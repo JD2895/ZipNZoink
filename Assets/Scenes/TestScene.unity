@@ -609,8 +609,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gravity: 0.3
   maxSpeed: 5
-  cutOffSpeed: 5
-  timeToMaxSpeed: 0.1
+  cutOffSpeed: 2
+  timeToMaxSpeed: 0.05
   timeToNoSpeed: 0.1
 --- !u!61 &1896348791
 BoxCollider2D:

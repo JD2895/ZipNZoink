@@ -68,6 +68,11 @@ public class PlayerMovement : MonoBehaviour
 
         // Check input
         float curHorInput = Input.GetAxis("Horizontal");
+        bool fireHook = Input.GetButton("Right Hook Fire");
+        //bool fireHook = Input.GetButtonDown("Right Hook Fire");
+        float reelHook = Input.GetAxis("Right Hook Reel");
+
+        // Apply horiztonal input
         if (Mathf.Abs(curHorInput) > inputDeadZone)
         {
             if (Mathf.Sign(hInputToAppliy) != Mathf.Sign(curHorInput))
@@ -83,6 +88,13 @@ public class PlayerMovement : MonoBehaviour
             else
                 hInputToAppliy = 0f;
         }
+
+        // Fire Hooks
+        if (fireHook)
+            Debug.Log("Right hook fired");
+
+        if (reelHook > 0.1)
+            Debug.Log("Right hook reeled");
 
         // Add values
         directionToMove.y += gravityToApply;
