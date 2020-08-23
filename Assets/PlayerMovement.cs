@@ -14,11 +14,14 @@ public class PlayerMovement : MonoBehaviour
 
     // Check bools
     private bool groundBelowCheck;
+    private bool hitGround;
 
     // Gravity
-    public float gravity;
+    public float maxGravity;
+    public float timeToMaxGravity;
+    private float gravPerSec;
     private bool applyGravity = true;
-    private float gravityToApply;
+    private float gravityToApply = 0f;
 
     // Movement
     public float maxSpeed;
@@ -27,7 +30,13 @@ public class PlayerMovement : MonoBehaviour
     public float timeToNoSpeed;
     private float accelPerSec;
     private float decelPerSec;
-    private float hInputToAppliy;
+    private float hInputToAppliy = 0f;
+
+    // Grappling Hook
+    public GameObject hookObject;
+    private GameObject hookContainer;
+    private bool hookOut;
+    private LineRenderer hookLine;
 
     // Helpers
     private Rigidbody2D rb;
@@ -39,11 +48,18 @@ public class PlayerMovement : MonoBehaviour
         directionToMove = Vector3.zero;
         rb = this.GetComponent<Rigidbody2D>();
 
-        // Initial setup
-        gravityToApply = 0f;
-        hInputToAppliy = 0f;
+        //***** Initial setup *****
+        // Movement Setup
         accelPerSec = maxSpeed / timeToMaxSpeed;
         decelPerSec = -maxSpeed / timeToNoSpeed;
+        gravPerSec = maxGravity / timeToMaxGravity;
+        // Hook Setup
+        hookOut = false;
+        hookContainer = new GameObject("HookContainer");
+        hookContainer.transform.parent = transform;
+        hookLine = hookContainer.AddComponent<LineRenderer>();
+        hookLine.widthMultiplier = 0.1f;
+        hookLine.positionCount = 2;
     }
 
     private void FixedUpdate()
@@ -54,8 +70,9 @@ public class PlayerMovement : MonoBehaviour
         groundBelowCheck = CheckGround();
 
         // Check to reset directionToMove
-        if (groundBelowCheck)
+        if (groundBelowCheck && hitGround)
         {
+            hitGround = false;
             gravityToApply = 0f;
         }
         
@@ -63,13 +80,14 @@ public class PlayerMovement : MonoBehaviour
         applyGravity = !groundBelowCheck;
         if (applyGravity)
         {
-            gravityToApply -= gravity;
+            gravityToApply -= gravPerSec * Time.fixedDeltaTime;
+            if (gravityToApply < (maxGravity * -1f))
+                gravityToApply = maxGravity * -1f;
         }
 
         // Check input
         float curHorInput = Input.GetAxis("Horizontal");
         bool fireHook = Input.GetButton("Right Hook Fire");
-        //bool fireHook = Input.GetButtonDown("Right Hook Fire");
         float reelHook = Input.GetAxis("Right Hook Reel");
 
         // Apply horiztonal input
@@ -77,31 +95,43 @@ public class PlayerMovement : MonoBehaviour
         {
             if (Mathf.Sign(hInputToAppliy) != Mathf.Sign(curHorInput))
                 hInputToAppliy *= -1f;  // Immediately change direction but maintain the previous speed
-            hInputToAppliy += curHorInput * accelPerSec * Time.deltaTime;
+            hInputToAppliy += curHorInput * accelPerSec * Time.fixedDeltaTime;
             if (Mathf.Abs(hInputToAppliy) > maxSpeed)
                 hInputToAppliy = Mathf.Sign(hInputToAppliy) * maxSpeed;
         }
         else
         {
             if (hInputToAppliy > cutOffSpeed || cutOffSpeed * -1f > hInputToAppliy)
-                hInputToAppliy += decelPerSec * Time.deltaTime * Mathf.Sign(hInputToAppliy);
+                hInputToAppliy += decelPerSec * Time.fixedDeltaTime * Mathf.Sign(hInputToAppliy);
             else
                 hInputToAppliy = 0f;
         }
 
         // Fire Hooks
-        if (fireHook)
+        if (fireHook && !hookOut)
+        {
+            hookOut = true;
+            DrawHook(hookObject);
             Debug.Log("Right hook fired");
+        }
 
-        if (reelHook > 0.1)
-            Debug.Log("Right hook reeled");
+        if (reelHook > 0.1 && hookOut)
+        {
+            Debug.Log("Right hook reeling");
+        }
+
+        //Drawing
+        if (hookOut)
+        {
+            DrawHook(hookObject);
+        }
 
         // Add values
         directionToMove.y += gravityToApply;
         directionToMove.x += hInputToAppliy;
 
         // Set position
-        newPosition += directionToMove * Time.deltaTime;
+        newPosition += directionToMove * Time.fixedDeltaTime;
         rb.MovePosition(newPosition);
     }
 
@@ -147,5 +177,19 @@ public class PlayerMovement : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Ground"))
+        {
+            hitGround = true;
+        }
+    }
+
+    public void DrawHook(GameObject hookPoint)
+    {
+        hookLine.SetPosition(0, this.transform.position);
+        hookLine.SetPosition(1, hookPoint.transform.position);
     }
 }
