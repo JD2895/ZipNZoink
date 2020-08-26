@@ -35,13 +35,24 @@ public class PlayerMovement : MonoBehaviour
     // Grappling Hook
     public GameObject hookObject;
     private GameObject hookContainer;
-    private bool hookOut;
+    private bool hookOut = false;
+    private bool hookOnGround = false;
     private LineRenderer hookLine;
 
     // Helpers
     private Rigidbody2D rb;
     private Vector3 directionToMove;
     private Vector3 newPosition;
+
+    private void OnEnable()
+    {
+        HookHelper.OnHookHitGround += HookHitGround;
+    }
+
+    private void OnDisable()
+    {
+        HookHelper.OnHookHitGround -= HookHitGround;
+    }
 
     void Awake()
     {
@@ -54,7 +65,6 @@ public class PlayerMovement : MonoBehaviour
         decelPerSec = -maxSpeed / timeToNoSpeed;
         gravPerSec = maxGravity / timeToMaxGravity;
         // Hook Setup
-        hookOut = false;
         hookContainer = new GameObject("HookContainer");
         hookContainer.transform.parent = transform;
         hookLine = hookContainer.AddComponent<LineRenderer>();
@@ -115,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Right hook fired");
         }
 
-        if (reelHook > 0.1 && hookOut)
+        if (reelHook > 0.1 && hookOnGround)
         {
             Debug.Log("Right hook reeling");
         }
@@ -191,5 +201,10 @@ public class PlayerMovement : MonoBehaviour
     {
         hookLine.SetPosition(0, this.transform.position);
         hookLine.SetPosition(1, hookPoint.transform.position);
+    }
+
+    private void HookHitGround()
+    {
+        hookOnGround = true;
     }
 }
