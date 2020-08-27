@@ -38,11 +38,14 @@ public class PlayerMovement : MonoBehaviour
     private bool hookOut = false;
     private bool hookOnGround = false;
     private LineRenderer hookLine;
+    public float hookForceMultiplier = 1.0f;
 
     // Helpers
     private Rigidbody2D rb;
     private Vector3 directionToMove;
+    private Vector3 momentum;
     private Vector3 newPosition;
+    private Vector2 hookMovementDirection;
 
     private void OnEnable()
     {
@@ -64,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
         accelPerSec = maxSpeed / timeToMaxSpeed;
         decelPerSec = -maxSpeed / timeToNoSpeed;
         gravPerSec = maxGravity / timeToMaxGravity;
+        momentum = Vector3.zero;
         // Hook Setup
         hookContainer = new GameObject("HookContainer");
         hookContainer.transform.parent = transform;
@@ -75,7 +79,8 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         // Setup
-        directionToMove = Vector3.zero;
+        directionToMove = Vector2.zero;
+        hookMovementDirection = Vector2.zero;
         newPosition = transform.position;
         groundBelowCheck = CheckGround();
 
@@ -117,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
                 hInputToAppliy = 0f;
         }
 
-        // Fire Hooks
+        // Fire Hook
         if (fireHook && !hookOut)
         {
             hookOut = true;
@@ -125,12 +130,15 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Right hook fired");
         }
 
+        // Reel Hook
         if (reelHook > 0.1 && hookOnGround)
         {
             Debug.Log("Right hook reeling");
+            hookMovementDirection = GetHookDirection(hookObject);
+            hookMovementDirection *= hookForceMultiplier * Time.fixedDeltaTime;
         }
 
-        //Drawing
+        // Drawing
         if (hookOut)
         {
             DrawHook(hookObject);
@@ -138,11 +146,28 @@ public class PlayerMovement : MonoBehaviour
 
         // Add values
         directionToMove.y += gravityToApply;
+        directionToMove.y += hookMovementDirection.y;
         directionToMove.x += hInputToAppliy;
+        directionToMove.x += hookMovementDirection.x;
+
+        /*
+        // Momentum
+        if (groundBelowCheck)
+        {
+            momentum = Vector3.zero;
+        }
+        else
+        {
+            directionToMove.y += momentum.y;
+            directionToMove.x += momentum.x;
+        }*/
 
         // Set position
         newPosition += directionToMove * Time.fixedDeltaTime;
         rb.MovePosition(newPosition);
+
+        // Post calculations
+        momentum = directionToMove;
     }
 
     private bool CheckGround()
@@ -197,10 +222,20 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void DrawHook(GameObject hookPoint)
+    private void DrawHook(GameObject hookPoint)
     {
         hookLine.SetPosition(0, this.transform.position);
         hookLine.SetPosition(1, hookPoint.transform.position);
+    }
+
+    private Vector2 GetHookDirection(GameObject hookPoint)
+    {
+        Vector2 hookDirection = new Vector2();
+
+        hookDirection.x = hookPoint.transform.position.x - this.transform.position.x;
+        hookDirection.y = hookPoint.transform.position.y - this.transform.position.y;
+
+        return hookDirection.normalized;
     }
 
     private void HookHitGround()

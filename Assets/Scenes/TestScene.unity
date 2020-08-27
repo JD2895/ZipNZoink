@@ -709,7 +709,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1896348788}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4, y: 0, z: 0}
+  m_LocalPosition: {x: -4, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1363788154}
@@ -729,13 +729,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b34c88894a81fe4b8abfe19589da02c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxGravity: 10
+  maxGravity: 0
   timeToMaxGravity: 0.2
   maxSpeed: 5
   cutOffSpeed: 2
   timeToMaxSpeed: 0.05
   timeToNoSpeed: 0.1
   hookObject: {fileID: 580482141}
+  hookForceMultiplier: 700
 --- !u!61 &1896348791
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -777,12 +778,12 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 0
+  m_GravityScale: 30
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!1 &2088309595
 GameObject:
   m_ObjectHideFlags: 0
