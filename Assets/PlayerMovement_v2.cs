@@ -39,9 +39,7 @@ public class PlayerMovement_v2 : MonoBehaviour
 
     void Awake()
     {
-
         /***** Initial setup *****/
-
         /*** HOOK SETUP ***/
         // Line (drawing) setup
         hookLineContainer = new GameObject("HookContainer");
@@ -56,6 +54,7 @@ public class PlayerMovement_v2 : MonoBehaviour
         hookJoint.connectedBody = hookObject.GetComponent<Rigidbody2D>();
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
+        hookObject.SetActive(false);
     }
 
     private void Update()
@@ -69,17 +68,18 @@ public class PlayerMovement_v2 : MonoBehaviour
         if (fireHook && !h_out)
         {
             Debug.Log("Right hook fired");
+            FireRightHook();
             h_out = true;
-            ChangeRightHookConnectedState(true);
         }
         else if (fireHook && h_out)
         {
             Debug.Log("Right hook disconnected");
             h_out = false;
             ChangeRightHookConnectedState(false);
+            hookObject.SetActive(false);
         }
 
-        if (h_out && reelHook >= 0.1f)    //TODO: replace with 'hookOnGround' once grappling hook firing is implemented
+        if (h_onGround && reelHook >= 0.1f)
         {
             h_reelValue = reelHook;
         }
@@ -92,11 +92,11 @@ public class PlayerMovement_v2 : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (h_out && h_reelValue > 0)
+        // Reel in
+        if (h_onGround && h_reelValue > 0)
         {
             ReelRightHook(h_reelValue);
         }
-
     }
 
     private void LateUpdate()
@@ -131,9 +131,16 @@ public class PlayerMovement_v2 : MonoBehaviour
         hookJoint.enabled = true;
     }
 
+    private void FireRightHook()
+    {
+        hookObject.SetActive(true);
+        hookObject.GetComponent<HookHelper>().FireHook(this.transform.position, HookHelper.HookDirection.Right);
+    }
+
     private void HookHitGround()
     {
         h_onGround = true;
+        ChangeRightHookConnectedState(true);
     }
 
     private void ChangeRightHookConnectedState(bool toState)
@@ -143,7 +150,6 @@ public class PlayerMovement_v2 : MonoBehaviour
         {
             float dist = Vector2.Distance(this.transform.position, hookObject.transform.position);
             hookJoint.distance = dist;
-            Debug.Log(dist);
         }
     }
 }
