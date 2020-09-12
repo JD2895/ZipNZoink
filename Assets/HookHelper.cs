@@ -6,14 +6,15 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class HookHelper : MonoBehaviour
 {
-    public static event Action OnHookHitGround;
+    public static event Action<HookSide> OnHookHitGround;
     public float firingSpeed;
+    public HookSide hookSide;
 
     private Rigidbody2D rb;
     private bool hitGround = false;
     private bool firing = false;
-    private HookDirection hookFiringDirection;
     private Vector2 nextPosition;
+    private Vector2 firingDirection = new Vector2();
 
     private void Awake()
     {
@@ -25,36 +26,19 @@ public class HookHelper : MonoBehaviour
         if (firing && !hitGround)
         {
             nextPosition = this.transform.position;
-
-            if (hookFiringDirection == HookDirection.Right)
-            {   // Going right
-                nextPosition += new Vector2(1, 1) * firingSpeed * Time.fixedDeltaTime;
-            }
-            else
-            {   // Going left
-                nextPosition += new Vector2(-1, 1) * firingSpeed * Time.fixedDeltaTime;
-            }
+            nextPosition += firingDirection * firingSpeed * Time.fixedDeltaTime;
             rb.MovePosition(nextPosition);
         }
     }
 
-    public void FireHook(Vector2 startingPosition, HookDirection direction)
+    public void FireHook(Vector2 startingPosition, Vector2 directionToFire)
     {
-        hookFiringDirection = direction;
+        firingDirection = directionToFire.normalized;
         this.transform.position = startingPosition;
         firing = true;
         hitGround = false;
-        if (direction == HookDirection.Right)
-            this.transform.eulerAngles = new Vector3(0f, 0f, -45f);
-        else
-            this.transform.eulerAngles = new Vector3(0f, 0f, 45f);
+        this.transform.eulerAngles = new Vector3(0f, 0f, Vector2.SignedAngle(Vector2.up, firingDirection));
         rb.bodyType = RigidbodyType2D.Dynamic;
-    }
-
-    public enum HookDirection
-    {
-        Right = 1,
-        Left = -1
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -64,8 +48,7 @@ public class HookHelper : MonoBehaviour
             hitGround = true;
             firing = false;
             rb.bodyType = RigidbodyType2D.Kinematic;
-            Debug.Log("hit ground");
-            OnHookHitGround?.Invoke();
+            OnHookHitGround?.Invoke(hookSide);
         }
     }
 }

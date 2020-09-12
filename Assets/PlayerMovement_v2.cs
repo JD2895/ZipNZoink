@@ -5,25 +5,35 @@ using UnityEngine;
 public class PlayerMovement_v2 : MonoBehaviour
 {
     /*** HOOK DATA ***/
-    public GameObject hookObject;
+    public GameObject hr_Object;
+    public GameObject hl_Object;
     // Physics
-    private DistanceJoint2D hookJoint;
+    private DistanceJoint2D hr_Joint;
+    private DistanceJoint2D hl_Joint;
     public float maxReelSpeed;
     public float timeToMaxReelSpeed;
     private float reelPerSec;
-    private float reelToApply;
+    private float reelToApplyRight;
+    private float reelToApplyLeft;
     // Line drawing
-    private GameObject hookLineContainer;
-    private LineRenderer hookLine;
+    private GameObject hr_LineContainer;
+    private LineRenderer hr_Line;
+    private GameObject hl_LineContainer;
+    private LineRenderer hl_Line;
     // Hook helpers
-    private bool h_out = false;
-    private bool h_onGround = false;
-    private float h_reelValue = 0;
+    private bool hr_out = false;
+    private bool hr_onGround = false;
+    private float hr_reelValue = 0;
+    private bool hl_out = false;
+    private bool hl_onGround = false;
+    private float hl_reelValue = 0;
 
     /*** INPUT VARS ***/
     private float curHorInput = 0;
-    private bool fireHook = false;
-    private float reelHook = 0;
+    private bool fireRightHook = false;
+    private float reelRightHook = 0;
+    private bool fireLeftHook = false;
+    private float reelLeftHook = 0;
 
     /*** HELPERS ***/
 
@@ -39,117 +49,234 @@ public class PlayerMovement_v2 : MonoBehaviour
 
     void Awake()
     {
-        /***** Initial setup *****/
         /*** HOOK SETUP ***/
         // Line (drawing) setup
-        hookLineContainer = new GameObject("HookContainer");
-        hookLineContainer.transform.parent = transform;
-        hookLine = hookLineContainer.AddComponent<LineRenderer>();
-        hookLine.widthMultiplier = 0.1f;
-        hookLine.positionCount = 2;
+        hr_LineContainer = new GameObject("RightHookLine");
+        hr_LineContainer.transform.parent = transform;
+        hr_Line = hr_LineContainer.AddComponent<LineRenderer>();
+        hr_Line.widthMultiplier = 0.1f;
+        hr_Line.positionCount = 2;
         // Joint setup
-        hookJoint = gameObject.AddComponent<DistanceJoint2D>();
-        hookJoint.enabled = false;
-        hookJoint.autoConfigureDistance = false;
-        hookJoint.connectedBody = hookObject.GetComponent<Rigidbody2D>();
+        hr_Joint = gameObject.AddComponent<DistanceJoint2D>();
+        hr_Joint.enabled = false;
+        hr_Joint.autoConfigureDistance = false;
+        hr_Joint.connectedBody = hr_Object.GetComponent<Rigidbody2D>();
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
-        hookObject.SetActive(false);
+        // Other
+        hr_Object.SetActive(false);
+
+        // Line (drawing) setup
+        hl_LineContainer = new GameObject("LeftHookLine");
+        hl_LineContainer.transform.parent = transform;
+        hl_Line = hl_LineContainer.AddComponent<LineRenderer>();
+        hl_Line.widthMultiplier = 0.1f;
+        hl_Line.positionCount = 2;
+        // Joint setup
+        hl_Joint = gameObject.AddComponent<DistanceJoint2D>();
+        hl_Joint.enabled = false;
+        hl_Joint.autoConfigureDistance = false;
+        hl_Joint.connectedBody = hl_Object.GetComponent<Rigidbody2D>();
+        // Other
+        hl_Object.SetActive(false);
     }
 
     private void Update()
     {
         // Check input
         curHorInput = Input.GetAxis("Horizontal");
-        fireHook = Input.GetButtonDown("Right Hook Fire");
-        reelHook = Input.GetAxis("Right Hook Reel");
+        fireRightHook = Input.GetButtonDown("Right Hook Fire");
+        reelRightHook = Input.GetAxis("Right Hook Reel");
+        fireLeftHook = Input.GetButtonDown("Left Hook Fire");
+        reelLeftHook = Input.GetAxis("Left Hook Reel");
 
-        // Fire/Disconnect Hook
-        if (fireHook && !h_out)
-        {
-            Debug.Log("Right hook fired");
-            FireRightHook();
-            h_out = true;
+        // Right hook control
+        if (fireRightHook && !hr_out)
+        {   // Fire hook
+            FireHook(HookSide.Right);
+            hr_out = true;
         }
-        else if (fireHook && h_out)
-        {
-            Debug.Log("Right hook disconnected");
-            h_out = false;
-            ChangeRightHookConnectedState(false);
-            hookObject.SetActive(false);
+        else if (fireRightHook && hr_out)
+        {   // Disconnect right hook
+            hr_out = false;
+            ChangeHookConnectedState(false, HookSide.Right);
+            hr_Object.SetActive(false);
+            hr_onGround = false;
         }
 
-        if (h_onGround && reelHook >= 0.1f)
+        if (hr_onGround && reelRightHook >= 0.05f)
         {
-            h_reelValue = reelHook;
+            hr_reelValue = reelRightHook;
         }
         else
         {
-            reelToApply = 0;
-            h_reelValue = 0;
+            reelToApplyRight = 0;
+            hr_reelValue = 0;
         }
+        
+        // Left hook control
+        if (fireLeftHook && !hl_out)
+        {   // Fire hook
+            FireHook(HookSide.Left);
+            hl_out = true;
+        }
+        else if (fireLeftHook && hl_out)
+        {   // Disconnect hook
+            hl_out = false;
+            ChangeHookConnectedState(false, HookSide.Left);
+            hl_Object.SetActive(false);
+            hl_onGround = false;
+        }
+
+        if (hl_onGround && reelLeftHook >= 0.05f)
+        {
+            hl_reelValue = reelLeftHook;
+        }
+        else
+        {
+            reelToApplyLeft = 0;
+            hl_reelValue = 0;
+        }
+
     }
 
     private void FixedUpdate()
     {
         // Reel in
-        if (h_onGround && h_reelValue > 0)
+        if (hr_onGround && hr_reelValue > 0)
         {
-            ReelRightHook(h_reelValue);
+            ReelHook(hr_reelValue, HookSide.Right);
+        }
+        if (hl_onGround && hl_reelValue > 0)
+        {
+            ReelHook(hl_reelValue, HookSide.Left);
         }
     }
 
     private void LateUpdate()
     {
-        // Drawing
-        if (h_out)
+        // Drawing Right Hook
+        if (hr_out)
         {
-            hookLine.enabled = true;
-            DrawHook(hookObject);
+            hr_Line.enabled = true;
+            DrawHook(HookSide.Right);
         }
         else
         {
-            hookLine.enabled = false;
+            hr_Line.enabled = false;
         }
-    }
-
-    private void DrawHook(GameObject hookPoint)
-    {
-        hookLine.SetPosition(0, this.transform.position);
-        hookLine.SetPosition(1, hookPoint.transform.position);
-    }
-
-    private void ReelRightHook (float inputReelValue)
-    {
-        reelToApply += reelPerSec;
-        if (reelToApply >= maxReelSpeed)
-            reelToApply = maxReelSpeed;
-        Debug.Log(reelToApply + " : " + reelToApply * Time.fixedDeltaTime);
-        hookJoint.distance -= reelToApply * inputReelValue * Time.fixedDeltaTime;
-        // This next bit is needed to prevent a bug that causes reeling to not work if the player collided with the ground while swinging
-        hookJoint.enabled = false;
-        hookJoint.enabled = true;
-    }
-
-    private void FireRightHook()
-    {
-        hookObject.SetActive(true);
-        hookObject.GetComponent<HookHelper>().FireHook(this.transform.position, HookHelper.HookDirection.Right);
-    }
-
-    private void HookHitGround()
-    {
-        h_onGround = true;
-        ChangeRightHookConnectedState(true);
-    }
-
-    private void ChangeRightHookConnectedState(bool toState)
-    {
-        hookJoint.enabled = toState;
-        if (toState)
+        // Drawing Left Hook
+        if (hl_out)
         {
-            float dist = Vector2.Distance(this.transform.position, hookObject.transform.position);
-            hookJoint.distance = dist;
+            hl_Line.enabled = true;
+            DrawHook(HookSide.Left);
+        }
+        else
+        {
+            hl_Line.enabled = false;
         }
     }
+
+    private void DrawHook(HookSide hookside)
+    {
+        if (hookside == HookSide.Right)
+        {
+            hr_Line.SetPosition(0, this.transform.position);
+            hr_Line.SetPosition(1, hr_Object.transform.position);
+        }
+        else if (hookside == HookSide.Left)
+        {
+            hl_Line.SetPosition(0, this.transform.position);
+            hl_Line.SetPosition(1, hl_Object.transform.position);
+        }
+    }
+
+    private void ReelHook (float inputReelValue, HookSide hookSide)
+    {
+        if (hookSide == HookSide.Right)
+        {
+            // Calculate amount to reel
+            reelToApplyRight += reelPerSec;
+            if (reelToApplyRight >= maxReelSpeed)
+                reelToApplyRight = maxReelSpeed;
+            // Reduce joint length by reel amount
+            hr_Joint.distance -= reelToApplyRight * inputReelValue * Time.fixedDeltaTime;
+            // This next bit is needed to prevent a bug that causes reeling to not work if the player collided with the ground while swinging
+            hr_Joint.enabled = false;
+            hr_Joint.enabled = true;
+        }
+        else if (hookSide == HookSide.Left)
+        {
+            // Calculate amount to reel
+            reelToApplyLeft += reelPerSec;
+            if (reelToApplyLeft >= maxReelSpeed)
+                reelToApplyLeft = maxReelSpeed;
+            // Reduce joint length by reel amount
+            hl_Joint.distance -= reelToApplyLeft * inputReelValue * Time.fixedDeltaTime;
+            // This next bit is needed to prevent a bug that causes reeling to not work if the player collided with the ground while swinging
+            hl_Joint.enabled = false;
+            hl_Joint.enabled = true;
+        }
+    }
+
+    private void FireHook(HookSide hookSide)
+    {
+        if (hookSide == HookSide.Right)
+        {
+            // Activate the hook and fire it
+            hr_Object.SetActive(true);
+            hr_Object.GetComponent<HookHelper>().FireHook(this.transform.position, new Vector2(1, 1));
+        }
+        else if (hookSide == HookSide.Left)
+        {
+            // Activate the hook and fire it
+            hl_Object.SetActive(true);
+            hl_Object.GetComponent<HookHelper>().FireHook(this.transform.position, new Vector2(-1, 1));
+        }
+    }
+
+    private void HookHitGround(HookSide hookSide)
+    {
+        if (hookSide == HookSide.Right)
+        {
+            hr_onGround = true;
+            ChangeHookConnectedState(true, HookSide.Right);
+        }
+        else if (hookSide == HookSide.Left)
+        {
+            hl_onGround = true;
+            ChangeHookConnectedState(true, HookSide.Left);
+        }
+    }
+
+    private void ChangeHookConnectedState(bool toState, HookSide hookSide)
+    {
+        if (hookSide == HookSide.Right)
+        {
+            // Enable the joint and set its distance
+            hr_Joint.enabled = toState;
+            if (toState)
+            {
+                float dist = Vector2.Distance(this.transform.position, hr_Object.transform.position);
+                hr_Joint.distance = dist;
+            }
+        }
+        else if (hookSide == HookSide.Left)
+        {
+            // Enable the joint and set its distance
+            hl_Joint.enabled = toState;
+            if (toState)
+            {
+                float dist = Vector2.Distance(this.transform.position, hl_Object.transform.position);
+                hl_Joint.distance = dist;
+            }
+        }
+    }
+
+}
+
+public enum HookSide
+{
+    Right = 0,
+    Left = 1
 }

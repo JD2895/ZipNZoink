@@ -49,12 +49,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        HookHelper.OnHookHitGround += HookHitGround;
+        //HookHelper.OnHookHitGround += HookHitGround;
     }
 
     private void OnDisable()
     {
-        HookHelper.OnHookHitGround -= HookHitGround;
+        //HookHelper.OnHookHitGround -= HookHitGround;
     }
 
     void Awake()
