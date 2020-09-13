@@ -35,8 +35,6 @@ public class PlayerMovement_v2 : MonoBehaviour
     private bool fireLeftHook = false;
     private float reelLeftHook = 0;
 
-    /*** HELPERS ***/
-
     private void OnEnable()
     {
         HookHelper.OnHookHitGround += HookHitGround;
@@ -94,7 +92,6 @@ public class PlayerMovement_v2 : MonoBehaviour
         if (fireRightHook && !hr_out)
         {   // Fire hook
             FireHook(HookSide.Right);
-            hr_out = true;
         }
         else if (fireRightHook && hr_out)
         {   // Disconnect right hook
@@ -118,7 +115,6 @@ public class PlayerMovement_v2 : MonoBehaviour
         if (fireLeftHook && !hl_out)
         {   // Fire hook
             FireHook(HookSide.Left);
-            hl_out = true;
         }
         else if (fireLeftHook && hl_out)
         {   // Disconnect hook
@@ -137,7 +133,6 @@ public class PlayerMovement_v2 : MonoBehaviour
             reelToApplyLeft = 0;
             hl_reelValue = 0;
         }
-
     }
 
     private void FixedUpdate()
@@ -224,12 +219,14 @@ public class PlayerMovement_v2 : MonoBehaviour
         if (hookSide == HookSide.Right)
         {
             // Activate the hook and fire it
+            hr_out = true;
             hr_Object.SetActive(true);
             hr_Object.GetComponent<HookHelper>().FireHook(this.transform.position, new Vector2(1, 1));
         }
         else if (hookSide == HookSide.Left)
         {
             // Activate the hook and fire it
+            hl_out = true;
             hl_Object.SetActive(true);
             hl_Object.GetComponent<HookHelper>().FireHook(this.transform.position, new Vector2(-1, 1));
         }
@@ -239,12 +236,10 @@ public class PlayerMovement_v2 : MonoBehaviour
     {
         if (hookSide == HookSide.Right)
         {
-            hr_onGround = true;
             ChangeHookConnectedState(true, HookSide.Right);
         }
         else if (hookSide == HookSide.Left)
         {
-            hl_onGround = true;
             ChangeHookConnectedState(true, HookSide.Left);
         }
     }
@@ -257,6 +252,7 @@ public class PlayerMovement_v2 : MonoBehaviour
             hr_Joint.enabled = toState;
             if (toState)
             {
+                hr_onGround = true;
                 float dist = Vector2.Distance(this.transform.position, hr_Object.transform.position);
                 hr_Joint.distance = dist;
             }
@@ -267,6 +263,7 @@ public class PlayerMovement_v2 : MonoBehaviour
             hl_Joint.enabled = toState;
             if (toState)
             {
+                hl_onGround = true;
                 float dist = Vector2.Distance(this.transform.position, hl_Object.transform.position);
                 hl_Joint.distance = dist;
             }

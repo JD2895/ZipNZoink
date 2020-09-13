@@ -9,17 +9,12 @@ public class HookHelper : MonoBehaviour
     public static event Action<HookSide> OnHookHitGround;
     public float firingSpeed;
     public HookSide hookSide;
+    public Rigidbody2D rb;
 
-    private Rigidbody2D rb;
     private bool hitGround = false;
     private bool firing = false;
     private Vector2 nextPosition;
     private Vector2 firingDirection = new Vector2();
-
-    private void Awake()
-    {
-        rb = this.GetComponent<Rigidbody2D>();
-    }
 
     private void FixedUpdate()
     {
@@ -45,6 +40,7 @@ public class HookHelper : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
+            //Debug.Log("Hook Hit Ground");
             hitGround = true;
             firing = false;
             rb.bodyType = RigidbodyType2D.Kinematic;
