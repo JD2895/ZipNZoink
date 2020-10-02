@@ -8,8 +8,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     /*** HOOK DATA ***/
     public GameObject hookR_Object;     // The hook head for the right hook.
     public GameObject hookL_Object;     // The hook head for the left hook.
-    private HookController hookR_Controller;
-    private HookController hookL_Controller;
+    private HookController hookR_controller;
+    private HookController hookL_controller;
     public HookControllerCommonSetup commonHookData;    // Common data for hook setup
     private bool hookR_connected = false;
     private bool hookL_connected = false;
@@ -37,6 +37,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     private float reelLeftHook = 0;
     private bool jumpInput = false;
 
+    /*** VISUAL DATA ***/
+    public SpriteRenderer playerSprite;
+
     private void OnEnable()
     {
         HookHelper.OnHookHitGround += HookHitGround;
@@ -50,10 +53,12 @@ public class PlayerMovement_v3 : MonoBehaviour
     private void Awake()
     {
         rb = this.GetComponent<Rigidbody2D>();
-        hookR_Controller = this.gameObject.AddComponent<HookController>();
-        hookR_Controller.SetupHook(hookR_Object, commonHookData);
-        hookL_Controller = this.gameObject.AddComponent<HookController>();
-        hookL_Controller.SetupHook(hookL_Object, commonHookData);
+        hookR_controller = this.gameObject.AddComponent<HookController>();
+        hookR_controller.SetupHook(hookR_Object, commonHookData);
+        hookL_controller = this.gameObject.AddComponent<HookController>();
+        hookL_controller.SetupHook(hookL_Object, commonHookData);
+
+        //playerSprite = this.GetComponent<SpriteRenderer>();
     }
 
     private void Update()
@@ -69,15 +74,17 @@ public class PlayerMovement_v3 : MonoBehaviour
         if (curHorInput > 0.1)
         {
             directionFacing = HoriDirection.Right;
+            playerSprite.flipX = false;
         }
         else if (curHorInput < -0.1)
         {
             directionFacing = HoriDirection.Left;
+            playerSprite.flipX = true;
         }
 
         horiToApply = 0;
 
-        Debug.Log(directionWhenJumpStarted);
+        //Debug.Log(directionWhenJumpStarted);
         if (IsGrounded())
         {
             horiToApply = curHorInput * horMoveMult;
@@ -89,7 +96,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             if(hookL_connected || hookR_connected)
             {
                 horiToApply = curHorInput * horHookMoveMult;
-                directionWhenJumpStarted = directionFacing;
+                directionWhenJumpStarted = directionFacing; // temp fix
             }
             else
             {
@@ -107,27 +114,30 @@ public class PlayerMovement_v3 : MonoBehaviour
         // Right hook control
         if (fireRightHook)
         {
-            hookR_Controller.FireHook(new Vector2(1, 1));
+            //hookR_Controller.FireHook(new Vector2(1, 1));
+            hookR_controller.FireHook(transform.up + transform.right);
             hookR_connected = hookR_connected ? false : true;   // If the hook is already connected, the hook is now going ot be disconnected
         }
-        hookR_Controller.ReelHook(reelRightHook);
+        hookR_controller.ReelHook(reelRightHook);
 
         // Left hook control
         if (fireLeftHook)
         {
-            hookL_Controller.FireHook(new Vector2(-1, 1));
+            //hookL_Controller.FireHook(new Vector2(-1, 1));
+            hookL_controller.FireHook(transform.up + -transform.right);
             hookL_connected = hookL_connected ? false : true;   // If the hook is already connected, the hook is now going ot be disconnected
         }
-        hookL_Controller.ReelHook(reelLeftHook);
+        hookL_controller.ReelHook(reelLeftHook);
     }
 
     private void FixedUpdate()
     {
         Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
         rb.AddForce(forceToApply);
+
         if (jumpQueued)
         {
-            rb.AddForce(new Vector2(0, jumpForceMult * Time.fixedDeltaTime), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(0, jumpForceMult), ForceMode2D.Impulse);
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
         }
@@ -142,12 +152,12 @@ public class PlayerMovement_v3 : MonoBehaviour
     {
         if (hookSide == HookSide.Right)
         {
-            hookR_Controller.ChangeHookConnectedState(true);
+            hookR_controller.ChangeHookConnectedState(true);
             hookR_connected = true;
         }
         else if (hookSide == HookSide.Left)
         {
-            hookL_Controller.ChangeHookConnectedState(true);
+            hookL_controller.ChangeHookConnectedState(true);
             hookL_connected = true;
         }
     }
@@ -156,7 +166,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     {
         float extraHeight = 0.05f;
         RaycastHit2D raycastHit = Physics2D.CircleCast(bottomCollider.bounds.center, bottomCollider.radius, Vector2.down, extraHeight, groundLayer);
-        Debug.DrawLine(bottomCollider.bounds.center, bottomCollider.bounds.center + (Vector3.down * extraHeight), Color.red);
+        //Debug.DrawLine(bottomCollider.bounds.center, bottomCollider.bounds.center + (Vector3.down * extraHeight), Color.red);
         return raycastHit.collider != null;
     }
 

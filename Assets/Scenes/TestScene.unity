@@ -136,6 +136,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: LeftHookHead
       objectReference: {fileID: 0}
+    - target: {fileID: 3626901316701642480, guid: e0bb4c3e7ffa7ce44ba9e9bceb85ab91,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3626901316701642508, guid: e0bb4c3e7ffa7ce44ba9e9bceb85ab91,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -460,7 +465,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -3, y: 2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -730,7 +735,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.15}
+  m_Offset: {x: 0, y: 0.19}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -741,7 +746,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.85, y: 0.7}
+  m_Size: {x: 0.85, y: 0.62}
   m_EdgeRadius: 0
 --- !u!50 &1128409263
 Rigidbody2D:
@@ -788,12 +793,13 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  jumpForceMult: 30
+  jumpForceMult: 0.5
   horMoveMult: 50
   horAirMoveMult: 20
-  horReverseAirMoveMult: 90
+  horReverseAirMoveMult: 110
   horHookMoveMult: 30
   maxSpeed: 5
+  playerSprite: {fileID: 376401532}
 --- !u!4 &1128409265
 Transform:
   m_ObjectHideFlags: 0

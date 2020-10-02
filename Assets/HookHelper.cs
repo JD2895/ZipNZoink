@@ -43,7 +43,7 @@ public class HookHelper : MonoBehaviour
             //Debug.Log("Hook Hit Ground");
             hitGround = true;
             firing = false;
-            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
         }
     }
