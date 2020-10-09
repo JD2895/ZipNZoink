@@ -137,7 +137,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         if (jumpQueued)
         {
-            rb.AddForce(new Vector2(0, jumpForceMult), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(0, jumpForceMult * Time.fixedDeltaTime), ForceMode2D.Impulse);
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
         }

@@ -793,7 +793,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  jumpForceMult: 0.5
+  jumpForceMult: 30
   horMoveMult: 50
   horAirMoveMult: 20
   horReverseAirMoveMult: 110
