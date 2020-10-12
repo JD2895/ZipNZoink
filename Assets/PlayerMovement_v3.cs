@@ -28,6 +28,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
     public float maxSpeed;
+    //Using to decelerate
+    private float halfSpeed;
 
     /*** INPUT VARS ***/
     private float curHorInput = 0;
@@ -61,6 +63,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         //playerSprite = this.GetComponent<SpriteRenderer>();
     }
 
+    private void Start()
+    {
+        halfSpeed = maxSpeed * 0.5f;
+    }
+
     private void Update()
     {
         // Check input
@@ -71,12 +78,12 @@ public class PlayerMovement_v3 : MonoBehaviour
         fireLeftHook = Input.GetButtonDown("Left Hook Fire");
         reelLeftHook = Input.GetAxis("Left Hook Reel");
 
-        if (curHorInput > 0.1)
+        if (curHorInput > 0)
         {
             directionFacing = HoriDirection.Right;
             playerSprite.flipX = false;
         }
-        else if (curHorInput < -0.1)
+        else if (curHorInput < 0)
         {
             directionFacing = HoriDirection.Left;
             playerSprite.flipX = true;
@@ -93,7 +100,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else
         {
-            if(hookL_connected || hookR_connected)
+            if (hookL_connected || hookR_connected)
             {
                 horiToApply = curHorInput * horHookMoveMult;
                 directionWhenJumpStarted = directionFacing; // temp fix
@@ -102,11 +109,20 @@ public class PlayerMovement_v3 : MonoBehaviour
             {
                 if (directionFacing != directionWhenJumpStarted)
                 {
+                 //   directionWhenJumpStarted = directionFacing;
                     horiToApply = curHorInput * horReverseAirMoveMult;  // Give the player more force to cancel the jump
+
                 }
                 else
                 {
                     horiToApply = curHorInput * horAirMoveMult;
+                }
+                if (Input.GetButtonUp("Jump"))
+                {
+                    if (rb.velocity.y > 4.0f)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, 4.0f);
+                    }
                 }
             }
         }
@@ -132,8 +148,32 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void FixedUpdate()
     {
+        ApplyMovement();
+    }
+
+    private void ApplyMovement()
+    {
         Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
         rb.AddForce(forceToApply);
+        if (IsGrounded())
+        {
+            if (Mathf.Abs(rb.velocity.x) > maxSpeed)
+            {
+                rb.AddForce(forceToApply * -1); // push equally in the oppposite direction once the max speed limit is reached
+            }
+            //Attempt at deceleration 
+          /*  if(curHorInput == 0 && Mathf.Abs(rb.velocity.x) > halfSpeed)
+            {
+                if (rb.velocity.x > 0)
+                {
+                    rb.velocity = new Vector2(halfSpeed, rb.velocity.y);
+                }
+                else if(rb.velocity.x < 0)
+                {
+                    rb.velocity = new Vector2(-halfSpeed, rb.velocity.y);
+                }
+            }*/
+        }
 
         if (jumpQueued)
         {
@@ -141,11 +181,6 @@ public class PlayerMovement_v3 : MonoBehaviour
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
         }
-
-        /*if (Mathf.Abs(rb.velocity.x) > maxSpeed)
-        {
-            rb.AddForce(forceToApply * -1); // pussh equally in the oppposite direction once the max speed limit is reached
-        }*/
     }
 
     private void HookHitGround(HookSide hookSide)
