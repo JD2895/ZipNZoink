@@ -28,6 +28,16 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
     public float maxSpeed;
+    public float jumpCutoff = 4.0f;
+
+    public float accelerateValue;
+    public float decelerateValue;
+
+    public float airAccelerateValue;
+    public float maxAirSpeed;
+
+    public float currentSpeed;
+
     //Using to decelerate
     private float halfSpeed;
 
@@ -54,7 +64,6 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void Awake()
     {
-        rb = this.GetComponent<Rigidbody2D>();
         hookR_controller = this.gameObject.AddComponent<HookController>();
         hookR_controller.SetupHook(hookR_Object, commonHookData);
         hookL_controller = this.gameObject.AddComponent<HookController>();
@@ -65,7 +74,9 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         halfSpeed = maxSpeed * 0.5f;
+        currentSpeed = 0.0f;
     }
 
     private void Update()
@@ -91,42 +102,115 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         horiToApply = 0;
 
-        //Debug.Log(directionWhenJumpStarted);
         if (IsGrounded())
         {
-            horiToApply = curHorInput * horMoveMult;
-            if (!jumpQueued)
-                jumpQueued = jumpInput;
-        }
-        else
-        {
-            if (hookL_connected || hookR_connected)
+            if (curHorInput == 0)
             {
-                horiToApply = curHorInput * horHookMoveMult;
-                directionWhenJumpStarted = directionFacing; // temp fix
-            }
-            else
-            {
-                if (directionFacing != directionWhenJumpStarted)
+                if (currentSpeed > 0)
                 {
-                 //   directionWhenJumpStarted = directionFacing;
-                    horiToApply = curHorInput * horReverseAirMoveMult;  // Give the player more force to cancel the jump
-
-                }
-                else
-                {
-                    horiToApply = curHorInput * horAirMoveMult;
-                }
-                if (Input.GetButtonUp("Jump"))
-                {
-                    if (rb.velocity.y > 4.0f)
+                    currentSpeed -= decelerateValue;
+                    if (currentSpeed < 0)
                     {
-                        rb.velocity = new Vector2(rb.velocity.x, 4.0f);
+                        currentSpeed = 0;
+                    }
+                }
+                else if (currentSpeed < 0)
+                {
+                    currentSpeed += decelerateValue;
+                    if (currentSpeed > 0)
+                    {
+                        currentSpeed = 0;
                     }
                 }
             }
+            else
+            {
+                currentSpeed += accelerateValue * curHorInput;
+                if (Mathf.Abs(currentSpeed) > maxSpeed)
+                {
+                    currentSpeed = maxSpeed * curHorInput;
+                }
+            }
+
+            rb.velocity = new Vector2(currentSpeed, rb.velocity.y);
+            if (!jumpQueued)
+            {
+                jumpQueued = jumpInput;
+            }
+        }
+        else
+        {
+            if (IsHooked())
+            {
+                currentSpeed = rb.velocity.x;
+                horiToApply = curHorInput * horHookMoveMult;
+                directionWhenJumpStarted = directionFacing; // temp fix
+            }
+            //In the air, unhooked
+            else
+            {
+                if (Input.GetButtonUp("Jump"))
+                {
+                    if (rb.velocity.y > jumpCutoff)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, jumpCutoff);
+                    }
+                }
+                currentSpeed += airAccelerateValue * curHorInput;
+                if (Mathf.Abs(currentSpeed) > maxAirSpeed)
+                {
+                    currentSpeed = maxAirSpeed * curHorInput;
+                }
+                rb.velocity = new Vector2(currentSpeed, rb.velocity.y);
+                //may delete
+                /*  if (curHorInput != 0 && rb.velocity.x * curHorInput < 0)
+                  {
+                      rb.velocity = new Vector2(0, rb.velocity.y);
+                  }*/
+            }
         }
 
+        //Debug.Log(directionWhenJumpStarted);
+        /* if (IsGrounded())
+         {
+             horiToApply = curHorInput * horMoveMult;
+             if (!jumpQueued)
+                 jumpQueued = jumpInput;
+         }
+         else
+         {
+             if (hookL_connected || hookR_connected)
+             {
+                 horiToApply = curHorInput * horHookMoveMult;
+                 directionWhenJumpStarted = directionFacing; // temp fix
+             }
+             else
+             {
+                 if (directionFacing != directionWhenJumpStarted)
+                 {
+                     //   directionWhenJumpStarted = directionFacing;
+                     horiToApply = curHorInput * horReverseAirMoveMult;  // Give the player more force to cancel the jump
+
+                 }
+                 else
+                 {
+                     horiToApply = curHorInput * horAirMoveMult;
+                 }
+                 if (Input.GetButtonUp("Jump"))
+                 {
+                     if (rb.velocity.y > 4.0f)
+                     {
+                         rb.velocity = new Vector2(rb.velocity.x, 4.0f);
+                     }
+                 }
+             }
+         }*/
+
+        ControlHooks();
+    }
+
+    private void ControlHooks()
+    {
         // Right hook control
         if (fireRightHook)
         {
@@ -148,7 +232,18 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void FixedUpdate()
     {
-        ApplyMovement();
+        if(!IsGrounded())
+        {
+            Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
+            rb.AddForce(forceToApply);
+        }
+        if (jumpQueued)
+        {
+            rb.AddForce(new Vector2(0, jumpForceMult * Time.fixedDeltaTime), ForceMode2D.Impulse);
+            jumpQueued = false;
+            directionWhenJumpStarted = directionFacing;
+        }
+        //    ApplyMovement();
     }
 
     private void ApplyMovement()
@@ -203,6 +298,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         RaycastHit2D raycastHit = Physics2D.CircleCast(bottomCollider.bounds.center, bottomCollider.radius, Vector2.down, extraHeight, groundLayer);
         //Debug.DrawLine(bottomCollider.bounds.center, bottomCollider.bounds.center + (Vector3.down * extraHeight), Color.red);
         return raycastHit.collider != null;
+    }
+
+    private bool IsHooked()
+    {
+        return (hookL_connected || hookR_connected);
     }
 
     enum HoriDirection
