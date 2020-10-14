@@ -16,6 +16,17 @@ public class HookHelper : MonoBehaviour
     private Vector2 nextPosition;
     private Vector2 firingDirection = new Vector2();
 
+    #region Platform Interaction Variables
+
+    private GameObject collisionObj;
+
+    private Vector3 targetLastPos;
+    private Vector3 hookOffset;
+    
+    private bool hookAttached;
+    private bool targetMoving;
+    #endregion
+
     private void FixedUpdate()
     {
         if (firing && !hitGround)
@@ -36,15 +47,54 @@ public class HookHelper : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
     }
 
+    private void AlignHookWithGround(Vector3 collisionPos)
+    {
+        if (collisionPos != targetLastPos)
+        {
+            rb.MovePosition(collisionPos + hookOffset);
+        }
+
+        targetLastPos = collisionPos;
+    }
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && !hookAttached)
         {
             //Debug.Log("Hook Hit Ground");
             hitGround = true;
             firing = false;
+            hookAttached = true;
+
+            collisionObj = collision.gameObject;
+            targetLastPos = collision.transform.position;
+            hookOffset = this.transform.position - targetLastPos;
+            
+
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
         }
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && hookAttached)
+        {
+            AlignHookWithGround(collision.transform.position);
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject == collisionObj)
+        {
+            hookAttached = false;
+            collisionObj = null;
+
+            hookOffset = Vector3.zero;
+            targetLastPos = Vector3.zero;
+        }
+
+    }
+
 }
