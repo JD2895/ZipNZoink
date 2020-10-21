@@ -1,25 +1,25 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class HookController : MonoBehaviour
 {
-    /*** HOOK DATA ***/
     // Setup variables
-    private GameObject h_Object;
-    private float maxReelSpeed;
-    private float timeToMaxReelSpeed;
-    private float inputReelMinimum;
+    private GameObject h_Object;        // The hook 'head' that gets fired and is one end of the joint.
+    private float maxReelSpeed;         // The maximum speed the player can reach while reeling in a connected hook.
+    private float timeToMaxReelSpeed;   // The time it takes to reach the maximum reel speed.
+    private float inputReelMinimum;     // The minimum input that needs to be registered before reeling happens (for controller trigger deadzones).
     // Physics
-    private DistanceJoint2D h_Joint;
-    private float reelPerSec;
-    private float reelToApply;
+    private DistanceJoint2D h_Joint;    // The hinge joint that is the basis of all the swing/reel mechanics.
+    private float reelPerSec;           // The amount of 'reeling' to apply per second if reeling is happening. reelPerSec = maxReelSpeed / timeToMaxReelSpeed.
+    private float reelToApply;          // Is used to keep track of how much the joint is going to be reducing in size.
     // Line drawing
-    private GameObject h_LineContainer;
-    private LineRenderer h_Line;
+    private GameObject h_LineContainer; // The gameobject that contains the line renderer for this hook
+    private LineRenderer h_Line;        // The line renderer componenet for this hook
     // Hook helpers
-    private bool h_out = false;
-    private bool h_onGround = false;
+    private bool h_out = false;         // Keeps track of if the hook is 'out' of the player
+    private bool h_onGround = false;    // Keeps track of if the hook is currently connected to the ground
 
     private void FixedUpdate()
     {
@@ -47,24 +47,25 @@ public class HookController : MonoBehaviour
         }
     }
 
-    public void SetupHook(GameObject newHookObject, float newInputReelMin, float newMaxReelSpeed, float newTimeToMaxReelSpeed, GameObject parentObject)
+    public void SetupHook(GameObject newHookObject, HookControllerCommonSetup newHookCommonData)
     {
         // Variables
         h_Object = newHookObject;
-        inputReelMinimum = newInputReelMin;
-        maxReelSpeed = newMaxReelSpeed;
-        timeToMaxReelSpeed = newTimeToMaxReelSpeed;
+        inputReelMinimum = newHookCommonData.inputReelMinimum;
+        maxReelSpeed = newHookCommonData.maxReelSpeed;
+        timeToMaxReelSpeed = newHookCommonData.timeToMaxReelSpeed;
         // Line (drawing) setup
         h_LineContainer = new GameObject("HookLine");
-        h_LineContainer.transform.parent = parentObject.transform;
+        h_LineContainer.transform.parent = newHookCommonData.controllerParent.transform;
         h_Line = h_LineContainer.AddComponent<LineRenderer>();
         h_Line.widthMultiplier = 0.1f;
         h_Line.positionCount = 2;
         // Joint setup
-        h_Joint = parentObject.AddComponent<DistanceJoint2D>();
-        h_Joint.enabled = false;
-        h_Joint.autoConfigureDistance = false;
-        h_Joint.connectedBody = h_Object.GetComponent<Rigidbody2D>();
+        h_Joint = newHookCommonData.controllerParent.AddComponent<DistanceJoint2D>();   // Attach one end of the joint to the player.
+        h_Joint.enabled = false;    // Disabled at start by default.
+        h_Joint.autoConfigureDistance = false;  // Setting to false allows for changing distances.
+        h_Joint.connectedBody = h_Object.GetComponent<Rigidbody2D>();               // Attach the other end of the joint to the hook head.
+        h_Joint.maxDistanceOnly = true;     // The joint can be 'compressed' but not 'stretched'. Helps when more than one hook is in use.
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
         // Other
@@ -127,4 +128,14 @@ public class HookController : MonoBehaviour
         h_Line.SetPosition(0, this.transform.position);
         h_Line.SetPosition(1, h_Object.transform.position);
     }
+}
+
+[Serializable]
+public class HookControllerCommonSetup
+{
+    public float minJointDistance;      // The minimum distance the grapple can reel to //TODO: Implement this.
+    public float inputReelMinimum;      // The minimum input that needs to be registered before reeling happens (for controller trigger deadzones).
+    public float maxReelSpeed;          // The maximum speed the player can reach while reeling in a connected hook.
+    public float timeToMaxReelSpeed;    // The time it takes to reach the maximum reel speed.
+    public GameObject controllerParent; // The parent object that the hook joints are attached to (the hook heads are on the other end of the joint). This should be the player.
 }
