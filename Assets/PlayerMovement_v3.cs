@@ -18,26 +18,27 @@ public class PlayerMovement_v3 : MonoBehaviour
     private Rigidbody2D rb;
     [SerializeField] private CircleCollider2D bottomCollider;
     [SerializeField] private LayerMask groundLayer;
-    public float jumpForceMult;
-    public float horMoveMult;
-    public float horAirMoveMult;
-    public float horReverseAirMoveMult;
-    public float horHookMoveMult;
-    private float horiToApply;
-    private bool jumpQueued;
-    private HoriDirection directionFacing;    // -1 is left, 1 is right
-    private HoriDirection directionWhenJumpStarted;
+    [Header("Ground Movement")]
     public float maxSpeed;
+    public float jumpForceMult;
+    private bool jumpQueued;
     public float jumpCutoff = 4.0f;
-
     public float accelerateValue;
     public float decelerateValue;
-
+    private float horiToApply;
+    [Header("Hook Movement")]
+    public float horHookMoveMult;
+    [Header("Air Movement")]
     public float airAccelerateValue;
     public float maxAirSpeed;
-
-    public float currentSpeed;
-
+    //public float horMoveMult;
+    //public float horAirMoveMult;
+    //public float horReverseAirMoveMult;
+    
+    // Helpers
+    private HoriDirection directionFacing;    // -1 is left, 1 is right
+    private HoriDirection directionWhenJumpStarted;
+    private float currentSpeed;
     //Using to decelerate
     private float halfSpeed;
 
