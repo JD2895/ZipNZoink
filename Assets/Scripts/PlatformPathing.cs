@@ -23,7 +23,7 @@ public class PlatformPathing : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         FollowPath();
 
@@ -31,7 +31,7 @@ public class PlatformPathing : MonoBehaviour
 
     private void FollowPath()
     {
-        distanceTravelled += pathSpeed * Time.deltaTime;
+        distanceTravelled += pathSpeed * Time.fixedDeltaTime;
         transform.position = path.path.GetPointAtDistance(distanceTravelled);
     }
 

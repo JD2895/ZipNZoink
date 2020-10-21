@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class HookHelper : MonoBehaviour
 {
     public static event Action<HookSide> OnHookHitGround;
+
     public float firingSpeed;
     public HookSide hookSide;
     public Rigidbody2D rb;
@@ -22,13 +24,13 @@ public class HookHelper : MonoBehaviour
 
     private Vector3 targetLastPos;
     private Vector3 hookOffset;
-    
+
     private bool hookAttached;
     private bool targetMoving;
     #endregion
 
     private void FixedUpdate()
-    {
+    {        
         if (firing && !hitGround)
         {
             nextPosition = this.transform.position;
@@ -47,11 +49,16 @@ public class HookHelper : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
     }
 
+
+    //Called while the Hook is touching a Ground collider
+    //Moves the hook to match the position of the collider if the collider is moving
     private void AlignHookWithGround(Vector3 collisionPos)
     {
         if (collisionPos != targetLastPos)
         {
-            rb.MovePosition(collisionPos + hookOffset);
+            transform.position = collisionPos + hookOffset;
+
+            if (transform.position.sqrMagnitude - (collisionPos + hookOffset).sqrMagnitude > 0.001f) throw new Exception("WTF");
         }
 
         targetLastPos = collisionPos;
@@ -68,8 +75,10 @@ public class HookHelper : MonoBehaviour
 
             collisionObj = collision.gameObject;
             targetLastPos = collision.transform.position;
-            hookOffset = this.transform.position - targetLastPos;
-            
+            hookOffset = transform.position - targetLastPos;
+
+            transform.position = targetLastPos + hookOffset;
+
 
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
@@ -78,7 +87,7 @@ public class HookHelper : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && hookAttached)
+        if (collision.gameObject == collisionObj && hookAttached)
         {
             AlignHookWithGround(collision.transform.position);
         }
@@ -95,6 +104,21 @@ public class HookHelper : MonoBehaviour
             targetLastPos = Vector3.zero;
         }
 
+    }
+
+    private GUIStyle bigFont = new GUIStyle();
+
+    private void OnGUI()
+    {
+        bigFont.fontSize = 25;
+
+        GUI.Label(new Rect(400, 200, 1000, 1000),
+            "CollisionObj: " + collisionObj +
+            "\ntargetLastPos: " + targetLastPos +
+            "\nHookOffset: " + hookOffset + 
+            "\nLastPos + HO: " + (targetLastPos + hookOffset) +
+            "\nPosition:     " + transform.position
+            ,bigFont);
     }
 
 }

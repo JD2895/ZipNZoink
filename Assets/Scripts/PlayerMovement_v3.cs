@@ -2,9 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerMovement_v3 : MonoBehaviour
 {
+    public static UnityEvent DetachHook; 
+    
     /*** HOOK DATA ***/
     public GameObject hookR_Object;     // The hook head for the right hook.
     public GameObject hookL_Object;     // The hook head for the left hook.
@@ -25,6 +28,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float horHookMoveMult;
     private float horiToApply;
     private bool jumpQueued;
+    private bool isAirJumping;
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
     public float maxSpeed;
@@ -52,6 +56,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     /*** VISUAL DATA ***/
     public SpriteRenderer playerSprite;
 
+    #region Initialization Methods
+
     private void OnEnable()
     {
         HookHelper.OnHookHitGround += HookHitGround;
@@ -64,20 +70,24 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void Awake()
     {
+        if (DetachHook == null) DetachHook = new UnityEvent();
+
         hookR_controller = this.gameObject.AddComponent<HookController>();
         hookR_controller.SetupHook(hookR_Object, commonHookData);
         hookL_controller = this.gameObject.AddComponent<HookController>();
         hookL_controller.SetupHook(hookL_Object, commonHookData);
+
+        rb = GetComponent<Rigidbody2D>();
 
         //playerSprite = this.GetComponent<SpriteRenderer>();
     }
 
     private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
         halfSpeed = maxSpeed * 0.5f;
         currentSpeed = 0.0f;
     }
+    #endregion
 
     private void Update()
     {
@@ -104,6 +114,8 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         if (IsGrounded())
         {
+            isAirJumping = false;
+            
             if (curHorInput == 0)
             {
                 if (currentSpeed > 0)
@@ -145,11 +157,16 @@ public class PlayerMovement_v3 : MonoBehaviour
                 currentSpeed = rb.velocity.x;
                 horiToApply = curHorInput * horHookMoveMult;
                 directionWhenJumpStarted = directionFacing; // temp fix
+
+                if (!jumpQueued)
+                {
+                    jumpQueued = jumpInput;
+                }
             }
             //In the air, unhooked
             else
             {
-                if (Input.GetButtonUp("Jump"))
+                if (Input.GetButtonUp("Jump") && !isAirJumping)
                 {
                     if (rb.velocity.y > jumpCutoff)
                     {
@@ -209,14 +226,37 @@ public class PlayerMovement_v3 : MonoBehaviour
         ControlHooks();
     }
 
+    private bool IsGrounded()
+    {
+        float extraHeight = 0.05f;
+        RaycastHit2D raycastHit = Physics2D.CircleCast(bottomCollider.bounds.center, bottomCollider.radius, Vector2.down, extraHeight, groundLayer);
+
+        
+        //One Way Platform Conditional: Make sure the player is ABOVE the platform before IsGrounded() is true
+        if (raycastHit.collider != null && raycastHit.collider.TryGetComponent(out PlatformEffector2D platEffector))
+        {
+            if (platEffector.useOneWay && rb.velocity.y > 0.1f || this.transform.position.y - 0.3f < raycastHit.collider.bounds.max.y)
+            {
+                return false;
+            }
+        }
+
+        //Debug.DrawLine(bottomCollider.bounds.center, bottomCollider.bounds.center + (Vector3.down * extraHeight), Color.red);
+        return raycastHit.collider != null;
+    }
+
     private void ControlHooks()
     {
+        
+        //Stephen: I think we should check the hook state using public bools from Hook Controller, rather than a local variable that gets toggled
+        hookR_connected = hookR_controller.h_onGround;
+        hookL_connected = hookL_controller.h_onGround;
+        
         // Right hook control
         if (fireRightHook)
         {
             //hookR_Controller.FireHook(new Vector2(1, 1));
             hookR_controller.FireHook(transform.up + transform.right);
-            hookR_connected = hookR_connected ? false : true;   // If the hook is already connected, the hook is now going ot be disconnected
         }
         hookR_controller.ReelHook(reelRightHook);
 
@@ -225,7 +265,6 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             //hookL_Controller.FireHook(new Vector2(-1, 1));
             hookL_controller.FireHook(transform.up + -transform.right);
-            hookL_connected = hookL_connected ? false : true;   // If the hook is already connected, the hook is now going ot be disconnected
         }
         hookL_controller.ReelHook(reelLeftHook);
     }
@@ -237,15 +276,63 @@ public class PlayerMovement_v3 : MonoBehaviour
             Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
             rb.AddForce(forceToApply);
         }
-        if (jumpQueued)
-        {
-            rb.AddForce(new Vector2(0, jumpForceMult * Time.fixedDeltaTime), ForceMode2D.Impulse);
-            jumpQueued = false;
-            directionWhenJumpStarted = directionFacing;
-        }
+
+        JumpLogic();
+
         //    ApplyMovement();
     }
 
+    #region FixedUpdate Movement Methods
+
+    private void JumpLogic()
+    {
+       
+        if (jumpQueued && IsGrounded())
+        {
+            jumpQueued = false;
+            directionWhenJumpStarted = directionFacing;
+
+            ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
+
+
+        } else if (jumpQueued && EvaluateHookState() == (int)HookedState.One)
+        {
+            Debug.Log("Jump!");
+            DetachHook.Invoke();
+
+            isAirJumping = true;
+            jumpQueued = false;
+            directionWhenJumpStarted = directionFacing;
+
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            ApplyJump(1.5f * rb.velocity.x * Time.fixedDeltaTime, 1.25f * jumpForceMult * Time.fixedDeltaTime);
+            
+
+        } else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
+        {
+            //ADD "SUPER JUMP" HERE
+            Debug.Log("Super Jump!");
+            DetachHook.Invoke();
+
+            isAirJumping = true;
+            jumpQueued = false;
+
+            rb.velocity = Vector2.zero;
+            ApplyJump(0, jumpForceMult * 3 * Time.fixedDeltaTime);
+
+        } else if(jumpQueued && EvaluateHookState() == (int)HookedState.None)
+        {
+            jumpQueued = false;
+        }
+    }
+
+    private void ApplyJump(float xforce, float yforce)
+    {
+        Vector2 jumpVector = new Vector2(xforce, yforce);
+        rb.AddForce(jumpVector, ForceMode2D.Impulse);
+    }
+    
+    
     private void ApplyMovement()
     {
         Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
@@ -277,6 +364,9 @@ public class PlayerMovement_v3 : MonoBehaviour
             directionWhenJumpStarted = directionFacing;
         }
     }
+    #endregion
+
+    #region Hook Methods and Enums
 
     private void HookHitGround(HookSide hookSide)
     {
@@ -292,12 +382,20 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
     }
 
-    private bool IsGrounded()
+    private int EvaluateHookState()
     {
-        float extraHeight = 0.05f;
-        RaycastHit2D raycastHit = Physics2D.CircleCast(bottomCollider.bounds.center, bottomCollider.radius, Vector2.down, extraHeight, groundLayer);
-        //Debug.DrawLine(bottomCollider.bounds.center, bottomCollider.bounds.center + (Vector3.down * extraHeight), Color.red);
-        return raycastHit.collider != null;
+        if ((hookL_controller.h_onGround && !hookR_controller.h_onGround)
+            || (!hookL_controller.h_onGround && hookR_controller.h_onGround))
+        {
+            return 1;
+        }
+
+        if (hookL_controller.h_onGround && hookR_controller.h_onGround)
+        {
+            return 2;
+        }
+
+        return 0;
     }
 
     private bool IsHooked()
@@ -305,9 +403,33 @@ public class PlayerMovement_v3 : MonoBehaviour
         return (hookL_connected || hookR_connected);
     }
 
+    enum HookedState
+    { 
+        None = 0,
+        One = 1,
+        Both = 2
+    
+    }
+    
     enum HoriDirection
     {
         Left = -1,
         Right = 1
     }
+
+    #endregion
+
+    private GUIStyle bigFont = new GUIStyle();
+
+    private void OnGUI()
+    {
+        bigFont.fontSize = 25;
+
+        GUI.Label(new Rect(100, 200, 1000, 1000),
+            "IsGrounded? " + IsGrounded() +
+            "\nIsHooked? " + IsHooked() + 
+            "\nHookR_Connected: " + hookR_connected,
+            bigFont);
+    }
+
 }

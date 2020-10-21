@@ -18,8 +18,8 @@ public class HookController : MonoBehaviour
     private GameObject h_LineContainer; // The gameobject that contains the line renderer for this hook
     private LineRenderer h_Line;        // The line renderer componenet for this hook
     // Hook helpers
-    private bool h_out = false;         // Keeps track of if the hook is 'out' of the player
-    private bool h_onGround = false;    // Keeps track of if the hook is currently connected to the ground
+    public bool h_out = false;         // Keeps track of if the hook is 'out' of the player
+    public bool h_onGround = false;    // Keeps track of if the hook is currently connected to the ground
 
     private void FixedUpdate()
     {
@@ -48,7 +48,7 @@ public class HookController : MonoBehaviour
     }
 
     public void SetupHook(GameObject newHookObject, HookControllerCommonSetup newHookCommonData)
-    {
+    {       
         // Variables
         h_Object = newHookObject;
         inputReelMinimum = newHookCommonData.inputReelMinimum;
@@ -69,6 +69,7 @@ public class HookController : MonoBehaviour
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
         // Other
+        PlayerMovement_v3.DetachHook.AddListener(DisconnectHook);
         h_Object.SetActive(false);
     }
 
@@ -89,6 +90,7 @@ public class HookController : MonoBehaviour
     private void DisconnectHook()
     {
         h_out = false;
+
         ChangeHookConnectedState(false);
         h_Object.SetActive(false);
         h_onGround = false;
@@ -139,3 +141,5 @@ public class HookControllerCommonSetup
     public float timeToMaxReelSpeed;    // The time it takes to reach the maximum reel speed.
     public GameObject controllerParent; // The parent object that the hook joints are attached to (the hook heads are on the other end of the joint). This should be the player.
 }
+
+
