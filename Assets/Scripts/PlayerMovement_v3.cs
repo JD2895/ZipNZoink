@@ -301,7 +301,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         } else if (jumpQueued && EvaluateHookState() == (int)HookedState.One)
         {
             // Hook jump
-            Debug.Log("Jump!");
+            Debug.Log("Hook Jump!");
             DetachHook.Invoke();
 
             isAirJumping = true;
