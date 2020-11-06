@@ -259,7 +259,57 @@ PrefabInstance:
     - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
         type: 3}
       propertyPath: hookJumpForceMult
-      value: 5
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: accelerateValueHorizontal
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: decelerateValueHorizontal
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: maxGroundSpeedViaInput
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: airDecelerateValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: maxHorizontalAirSpeed
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: jumpForceMult
+      value: 38
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: jumpCancelGravityMult
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: airAccelerateValue
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: superHookJumpForceMult
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: movementCancelHelper
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7063008748857666291, guid: 6f1d33765dacff54a88f86962009978e,
         type: 3}

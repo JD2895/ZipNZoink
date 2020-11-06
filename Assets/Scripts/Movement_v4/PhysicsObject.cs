@@ -8,9 +8,9 @@ public class PhysicsObject : MonoBehaviour
     public float minGroundNormalY = 0.65f;
     public float gravityModifier = 1f;
 
+    protected Vector2 targetVelocity;
     protected bool grounded;
     protected Vector2 groundNormal;
-
     protected Rigidbody2D rb2d;
     protected Vector2 velocity;
     protected ContactFilter2D contactFiler;
@@ -27,6 +27,7 @@ public class PhysicsObject : MonoBehaviour
 
     void Start()
     {
+        // Set what the player collides with, base it on the objects layer as set in the inspector
         contactFiler.useTriggers = false;
         contactFiler.SetLayerMask(Physics2D.GetLayerCollisionMask(gameObject.layer));
         contactFiler.useLayerMask = true;
@@ -34,20 +35,33 @@ public class PhysicsObject : MonoBehaviour
 
     void Update()
     {
-        
+        targetVelocity = Vector2.zero;
+        ComputeVelocity();
+    }
+
+    protected virtual void ComputeVelocity()
+    {
+
     }
 
     private void FixedUpdate()
     {
-        velocity += gravityModifier * Physics2D.gravity * Time.fixedDeltaTime;
+        velocity += gravityModifier * Physics2D.gravity * Time.deltaTime;  // Gravity
+        velocity.x = targetVelocity.x;  // Horizontal movement
 
         grounded = false;
 
-        Vector2 deltaPosition = velocity * Time.fixedDeltaTime;
+        Vector2 deltaPosition = velocity * Time.deltaTime; // The amount of change in position
 
-        Vector2 move = Vector2.up * deltaPosition.y;
+        Vector2 moveAlongGround = new Vector2(groundNormal.y, -groundNormal.x); // A vector at the bottom of the player pointing in the direction the player is facing
 
-        Movement(move, true);
+        Vector2 move = moveAlongGround * deltaPosition.x;
+
+        Movement(move, false); // Applying x movement
+
+        move = Vector2.up * deltaPosition.y;    // How much to move the player in the y direction
+
+        Movement(move, true);   // Applying y movement
     }
 
     void Movement (Vector2 move, bool yMovement)
@@ -65,7 +79,7 @@ public class PhysicsObject : MonoBehaviour
             for (int i = 0; i < hitBufferList.Count; i++)
             {
                 Vector2 currentNormal = hitBufferList[i].normal;
-                // Compare normals to check if the player should be 'on' the object (eg. on ground, but not on wall)
+                // Compare normals to check if the player should be 'on' the object (eg. should be 'on' the ground, but not 'on' a wall)
                 if (currentNormal.y > minGroundNormalY)
                 {
                     grounded = true;

@@ -23,19 +23,23 @@ public class PlayerMovement_v3 : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     [Header("Ground Movement")]
-    public float accelerateValue;
-    public float decelerateValue;
-    public float maxGroundSpeed;
+    public float accelerateValueHorizontal;
+    public float decelerateValueHorizontal;
+    public float maxGroundSpeedViaInput;
+    public float movementCancelHelper;
 
     [Header("Air Movement")]
     public float jumpForceMult;
     public float jumpCutoff;
+    public float jumpCancelGravityMult;
     public float airAccelerateValue;
-    public float maxAirSpeed;
+    public float airDecelerateValue;
+    public float maxHorizontalAirSpeed;
 
     [Header("Hook Movement")]
     public float horHookMoveMult;
     public float hookJumpForceMult;
+    public float superHookJumpForceMult;
 
     /*** MOVEMENT HELPERS ***/
     private float horiToApply;
@@ -43,8 +47,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool isAirJumping;
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
+    private float rbDefaultGravityScale;
 
-    private float currentSpeed; // Use inspector in debug mode to see this
+    private float curHorSpeed; // Use inspector in debug mode to see this
 
     //Using to decelerate
     private float halfSpeed;
@@ -82,14 +87,15 @@ public class PlayerMovement_v3 : MonoBehaviour
         hookL_controller.SetupHook(hookL_Object, commonHookData);
 
         rb = GetComponent<Rigidbody2D>();
+        rbDefaultGravityScale = rb.gravityScale;
 
         //playerSprite = this.GetComponent<SpriteRenderer>();
     }
 
     private void Start()
     {
-        halfSpeed = maxGroundSpeed * 0.5f;
-        currentSpeed = 0.0f;
+        halfSpeed = maxGroundSpeedViaInput * 0.5f;
+        curHorSpeed = 0.0f;
     }
     #endregion
 
@@ -97,6 +103,10 @@ public class PlayerMovement_v3 : MonoBehaviour
     {
         // Check input
         curHorInput = Input.GetAxis("Horizontal");
+        if (Mathf.Abs(curHorInput) < 0.1) //deadzone check
+        {
+            curHorInput = 0;
+        }
         jumpInput = Input.GetButtonDown("Jump");
         fireRightHook = Input.GetButtonDown("Right Hook Fire");
         reelRightHook = Input.GetAxis("Right Hook Reel");
@@ -118,37 +128,80 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         if (IsGrounded())
         {
+            // Set defaults
+            rb.gravityScale = rbDefaultGravityScale;
             isAirJumping = false;
             
             if (curHorInput == 0)
             {
-                if (currentSpeed > 0)
+                if (curHorSpeed > 0)
                 {
-                    currentSpeed -= decelerateValue;
-                    if (currentSpeed < 0)
+                    curHorSpeed -= decelerateValueHorizontal * Time.deltaTime;
+                    if (curHorSpeed < 0)
                     {
-                        currentSpeed = 0;
+                        curHorSpeed = 0;
                     }
                 }
-                else if (currentSpeed < 0)
+                else if (curHorSpeed < 0)
                 {
-                    currentSpeed += decelerateValue;
-                    if (currentSpeed > 0)
+                    curHorSpeed += decelerateValueHorizontal * Time.deltaTime;
+                    if (curHorSpeed > 0)
                     {
-                        currentSpeed = 0;
+                        curHorSpeed = 0;
                     }
                 }
             }
             else
             {
-                currentSpeed += accelerateValue * curHorInput;
-                if (Mathf.Abs(currentSpeed) > maxGroundSpeed)
+                if (Mathf.Abs(curHorSpeed) > maxGroundSpeedViaInput)
                 {
-                    currentSpeed = maxGroundSpeed * curHorInput;
+                    if (curHorSpeed > 0)
+                    {
+                        curHorSpeed -= decelerateValueHorizontal * Time.deltaTime;
+                        if (curHorInput < 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += accelerateValueHorizontal * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                    }
+                    else if (curHorSpeed < 0)
+                    {
+                        curHorSpeed += decelerateValueHorizontal * Time.deltaTime;
+                        if (curHorInput > 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += accelerateValueHorizontal * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                    }
+                }
+                else
+                {
+                    if (curHorSpeed >= 0)
+                    {
+                        if (curHorInput < 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += accelerateValueHorizontal * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                        else
+                        {
+                            curHorSpeed += accelerateValueHorizontal * curHorInput * Time.deltaTime;
+                        }
+                    }
+                    else if (curHorSpeed <= 0)
+                    {
+                        if (curHorInput > 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += accelerateValueHorizontal * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                        else
+                        {
+                            curHorSpeed += accelerateValueHorizontal * curHorInput * Time.deltaTime;
+                        }
+                    }
                 }
             }
 
-            rb.velocity = new Vector2(currentSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(curHorSpeed, rb.velocity.y);
+
+            // Jump queueing 
             if (!jumpQueued)
             {
                 jumpQueued = jumpInput;
@@ -158,7 +211,10 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             if (IsHooked())
             {
-                currentSpeed = rb.velocity.x;
+                // Set defaults
+                rb.gravityScale = rbDefaultGravityScale;
+
+                curHorSpeed = rb.velocity.x;
                 horiToApply = curHorInput * horHookMoveMult;
                 directionWhenJumpStarted = directionFacing; // temp fix
 
@@ -174,58 +230,34 @@ public class PlayerMovement_v3 : MonoBehaviour
                 {
                     if (rb.velocity.y > jumpCutoff)
                     {
-                        rb.velocity = new Vector2(rb.velocity.x, jumpCutoff);
+                        rb.gravityScale = rbDefaultGravityScale * jumpCancelGravityMult; // need to put in a check, if the player is falling faster than a 'max fall speed', change gravity scale back to default
                     }
                 }
-                currentSpeed += airAccelerateValue * curHorInput;
-                if (Mathf.Abs(currentSpeed) > maxAirSpeed)
+
+                curHorSpeed += airAccelerateValue * curHorInput * Time.deltaTime;
+                
+                if (Mathf.Abs(curHorSpeed) > maxHorizontalAirSpeed)
                 {
-                    currentSpeed = maxAirSpeed * curHorInput;
+                    if (curHorSpeed > 0)
+                    {
+                        curHorSpeed -= airDecelerateValue * Time.deltaTime;
+                        if (curHorInput < 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += airAccelerateValue * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                    }
+                    else if (curHorSpeed < 0)
+                    {
+                        curHorSpeed += airDecelerateValue * Time.deltaTime;
+                        if (curHorInput > 0)    // let the player contribute to slowing down
+                        {
+                            curHorSpeed += airAccelerateValue * movementCancelHelper * curHorInput * Time.deltaTime;
+                        }
+                    }
                 }
-                rb.velocity = new Vector2(currentSpeed, rb.velocity.y);
-                //may delete
-                /*  if (curHorInput != 0 && rb.velocity.x * curHorInput < 0)
-                  {
-                      rb.velocity = new Vector2(0, rb.velocity.y);
-                  }*/
+                rb.velocity = new Vector2(curHorSpeed, rb.velocity.y);
             }
         }
-
-        //Debug.Log(directionWhenJumpStarted);
-        /* if (IsGrounded())
-         {
-             horiToApply = curHorInput * horMoveMult;
-             if (!jumpQueued)
-                 jumpQueued = jumpInput;
-         }
-         else
-         {
-             if (hookL_connected || hookR_connected)
-             {
-                 horiToApply = curHorInput * horHookMoveMult;
-                 directionWhenJumpStarted = directionFacing; // temp fix
-             }
-             else
-             {
-                 if (directionFacing != directionWhenJumpStarted)
-                 {
-                     //   directionWhenJumpStarted = directionFacing;
-                     horiToApply = curHorInput * horReverseAirMoveMult;  // Give the player more force to cancel the jump
-
-                 }
-                 else
-                 {
-                     horiToApply = curHorInput * horAirMoveMult;
-                 }
-                 if (Input.GetButtonUp("Jump"))
-                 {
-                     if (rb.velocity.y > 4.0f)
-                     {
-                         rb.velocity = new Vector2(rb.velocity.x, 4.0f);
-                     }
-                 }
-             }
-         }*/
 
         ControlHooks();
     }
@@ -309,7 +341,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             directionWhenJumpStarted = directionFacing;
 
             rb.velocity = new Vector2(rb.velocity.x, 0f);
-            ApplyJump(1.5f * rb.velocity.x * Time.fixedDeltaTime, hookJumpForceMult * Time.fixedDeltaTime);
+            ApplyJump(rb.velocity.x * Time.fixedDeltaTime, hookJumpForceMult * Time.fixedDeltaTime);
             
 
         } else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
@@ -322,7 +354,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             jumpQueued = false;
 
             rb.velocity = Vector2.zero;
-            ApplyJump(0, jumpForceMult * 3 * Time.fixedDeltaTime);
+            ApplyJump(0, superHookJumpForceMult * Time.fixedDeltaTime);
 
         } else if(jumpQueued && EvaluateHookState() == (int)HookedState.None)
         {
@@ -343,7 +375,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         rb.AddForce(forceToApply);
         if (IsGrounded())
         {
-            if (Mathf.Abs(rb.velocity.x) > maxGroundSpeed)
+            if (Mathf.Abs(rb.velocity.x) > maxGroundSpeedViaInput)
             {
                 rb.AddForce(forceToApply * -1); // push equally in the oppposite direction once the max speed limit is reached
             }
@@ -431,7 +463,8 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         GUI.Label(new Rect(100, 200, 1000, 1000),
             "IsGrounded? " + IsGrounded() +
-            "\nIsHooked? " + IsHooked() + 
+            "\nIsHooked? " + IsHooked() +
+            "\ncurHorSpeed? " + curHorSpeed +
             "\nHookR_Connected: " + hookR_connected,
             bigFont);
     }
