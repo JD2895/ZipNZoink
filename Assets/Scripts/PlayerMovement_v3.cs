@@ -39,6 +39,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     [Header("Hook Movement")]
     public float horHookMoveMult = 30;
     public float hookJumpForceMult = 3;
+    public float hookJumpHorizMult = 0.7f;
     public float superHookJumpForceMult = 10;
 
     /*** MOVEMENT HELPERS ***/
@@ -212,7 +213,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             hookR_controller.FireHook(transform.up + transform.right);
         }
-        else if (unhookRightHook)
+        else if (unhookRightHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
         {
             hookR_controller.DisconnectHook();
         }
@@ -223,7 +224,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             hookL_controller.FireHook(transform.up + -transform.right);
         }
-        else if (unhookLeftHook)
+        else if (unhookLeftHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
         {
             hookL_controller.DisconnectHook();
         }
@@ -362,6 +363,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             }
         }
     }
+
     private void JumpLogic()
     {
         if (jumpQueued && IsGrounded())
@@ -373,7 +375,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
 
 
-        } else if (jumpQueued && EvaluateHookState() == (int)HookedState.One)
+        } else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
             // Hook jump
             Debug.Log("Hook Jump!");
@@ -383,8 +385,8 @@ public class PlayerMovement_v3 : MonoBehaviour
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
-            rb.velocity = new Vector2(rb.velocity.x, 0f);
-            ApplyJump(rb.velocity.x * Time.fixedDeltaTime, hookJumpForceMult * Time.fixedDeltaTime);
+            rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
+            ApplyJump(0, hookJumpForceMult * Time.fixedDeltaTime);
             
 
         } else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)

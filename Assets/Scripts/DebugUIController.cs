@@ -1,32 +1,37 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class DebugController : MonoBehaviour
+public class DebugUIController : MonoBehaviour
 {
-    public GameObject debugMenu;
+    public static DebugUIController instance;
 
     public HookFireVariant hookFireVar = HookFireVariant.Hold;
     public bool hookJump = true;
 
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this);
+        }
+
         DebugOptions.hookFireVarient = hookFireVar;
         DebugOptions.hookJump = hookJump;
     }
 
-    void Start()
+    public void UpdateDebugOptions()
     {
-        debugMenu.SetActive(false);
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Debug Reset"))
-        {
-            debugMenu.SetActive(!debugMenu.activeSelf);
-        }
+        DebugOptions.hookFireVarient = hookFireVar;
+        DebugOptions.hookJump = hookJump;
     }
 
     #region UI FUNCTIONS
@@ -45,6 +50,7 @@ public class DebugController : MonoBehaviour
 
     public void RestartLevel()
     {
+        Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 

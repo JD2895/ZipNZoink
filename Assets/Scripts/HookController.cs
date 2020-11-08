@@ -75,24 +75,31 @@ public class HookController : MonoBehaviour
 
     public void FireHook(Vector2 firingDirection)
     {
-        /*// Disconnect and fire are one button press
-        DisconnectHook();
-        h_out = true;
-        h_Object.SetActive(true);
-        h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
-        */
+        // Disconnect and fire are two button presses (also works for 'holding' the hook)
+        if (DebugOptions.hookFireVarient == HookFireVariant.TwoPress || DebugOptions.hookFireVarient == HookFireVariant.Hold)
+        {
+            if (!h_out)
+            {   // If the hook isn't out yet, activate the hook and fire it
+                h_out = true;
+                h_Object.SetActive(true);
+                h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
+            }
+            else if (h_out)
+            {   // If the hook is already out
+                DisconnectHook();
+            }
+        }
 
-        // Disconnect and fire art two button presses
-        if (!h_out)
-        {   // If the hook isn't out yet, activate the hook and fire it
+        // Disconnect and fire are one button press
+        if (DebugOptions.hookFireVarient == HookFireVariant.OnePress)
+        {
+            DisconnectHook();
             h_out = true;
             h_Object.SetActive(true);
             h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
-        } 
-        else if (h_out)
-        {   // If the hook is already out
-            DisconnectHook();
         }
+        
+
     }
 
     public void DisconnectHook()
