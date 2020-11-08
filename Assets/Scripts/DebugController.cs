@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class DebugController : MonoBehaviour
 {
+    public GameObject debugMenu;
+
     public HookFireVariant hookFireVar = HookFireVariant.Hold;
     public bool hookJump = true;
 
@@ -13,21 +16,37 @@ public class DebugController : MonoBehaviour
         DebugOptions.hookJump = hookJump;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        
+        debugMenu.SetActive(false);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Debug Reset"))
+        {
+            debugMenu.SetActive(!debugMenu.activeSelf);
+        }
     }
 
-    public void ChangeHookFireVariant(int variantNumber)
+    #region UI FUNCTIONS
+
+    public void ChangeHookFireVariant(float variantNumber)
     {
         hookFireVar = (HookFireVariant)variantNumber;
         DebugOptions.hookFireVarient = hookFireVar;
     }
+
+    public void ChangeHookJumpEnabled(bool hookJumpNewState)
+    {
+        hookJump = hookJumpNewState;
+        DebugOptions.hookJump = hookJump;
+    }
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    #endregion
 }
