@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 public class DebugUIHelper : MonoBehaviour
 {
@@ -10,17 +11,19 @@ public class DebugUIHelper : MonoBehaviour
 
     public Slider hookVariantSlider;
     public Toggle hookJumpToggle;
+    public Toggle debugTextToggle;
     public Button restartButton;
 
     void Start()
     {
-        restartButton.onClick.AddListener(DebugUIController.instance.RestartLevel);
-        hookJumpToggle.onValueChanged.AddListener(DebugUIController.instance.ChangeHookJumpEnabled);
-        hookVariantSlider.onValueChanged.AddListener(DebugUIController.instance.ChangeHookFireVariant);
+        // Initialisation
         DebugUIController.instance.UpdateDebugOptions();
+        EventSystem.current.SetSelectedGameObject(restartButton.gameObject);
 
-        hookJumpToggle.isOn = DebugUIController.instance.hookJump;
+        // Set UI based on current session's values
         hookVariantSlider.normalizedValue = (float)DebugUIController.instance.hookFireVar - 0.5f;   // the 0.5 is needed otherwise it just rounds to the next highest/lowest value???
+        hookJumpToggle.isOn = DebugUIController.instance.hookJump;
+        debugTextToggle.isOn = DebugUIController.instance.debugText;
 
         debugMenu.SetActive(false);
     }
@@ -41,4 +44,35 @@ public class DebugUIHelper : MonoBehaviour
             }
         }
     }
+
+    #region UI FUNCTIONS
+
+    public void ChangeHookFireVariant(float variantNumber)
+    {
+        DebugUIController.instance.hookFireVar = (HookFireVariant)variantNumber;
+
+        if (variantNumber == 2f)
+        {
+            DebugUIController.instance.hookJump = true;
+            hookJumpToggle.isOn = true;
+        }
+    }
+
+    public void ChangeHookJumpEnabled(bool hookJumpNewState)
+    {
+        DebugUIController.instance.hookJump = hookJumpNewState;
+    }
+
+    public void ChangeDebugTextEnabled(bool debugTextNewState)
+    {
+        DebugUIController.instance.debugText = debugTextNewState;
+    }
+
+    public void RestartLevel()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    #endregion
 }

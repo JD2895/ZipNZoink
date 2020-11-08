@@ -110,15 +110,19 @@ public class HookHelper : MonoBehaviour
 
     private void OnGUI()
     {
-        bigFont.fontSize = 25;
+        if (DebugOptions.debugText)
+        {
+            bigFont.fontSize = 20;
 
-        GUI.Label(new Rect(400, 200, 1000, 1000),
-            "CollisionObj: " + collisionObj +
-            "\ntargetLastPos: " + targetLastPos +
-            "\nHookOffset: " + hookOffset + 
-            "\nLastPos + HO: " + (targetLastPos + hookOffset) +
-            "\nPosition:     " + transform.position
-            ,bigFont);
+            GUI.Label(new Rect(400, 200, 1000, 1000),
+                "CollisionObj: " + collisionObj +
+                "\ntargetLastPos: " + targetLastPos +
+                "\nHookOffset: " + hookOffset +
+                "\nLastPos + HO: " + (targetLastPos + hookOffset) +
+                "\nPosition:     " + transform.position
+                , bigFont);
+
+        }
     }
 
 }

@@ -19,8 +19,8 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     /*** MOVEMENT DATA ***/
     private Rigidbody2D rb;
-    [SerializeField] private CircleCollider2D bottomCollider;
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private CircleCollider2D bottomCollider = new CircleCollider2D();
+    [SerializeField] private LayerMask groundLayer = new LayerMask();
 
     [Header("Ground Movement")]
     public float accelerateValueHorizontal = 30;
@@ -378,7 +378,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         } else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
             // Hook jump
-            Debug.Log("Hook Jump!");
+            //Debug.Log("Hook Jump!");
             DetachHook.Invoke();
 
             isAirJumping = true;
@@ -467,18 +467,25 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     #endregion
 
+    #region On-Screen Debug Text
+
     private GUIStyle bigFont = new GUIStyle();
 
     private void OnGUI()
     {
-        bigFont.fontSize = 25;
+        if (DebugOptions.debugText)
+        {
+            bigFont.fontSize = 20;
 
-        GUI.Label(new Rect(100, 200, 1000, 1000),
-            "IsGrounded? " + IsGrounded() +
-            "\nIsHooked? " + IsHooked() +
-            "\ncurHorSpeed? " + curHorSpeed +
-            "\nHookR_Connected: " + hookR_connected,
-            bigFont);
+            GUI.Label(new Rect(100, 200, 1000, 1000),
+                "IsGrounded? " + IsGrounded() +
+                "\nIsHooked? " + IsHooked() +
+                "\ncurHorSpeed? " + curHorSpeed +
+                "\nHookR_Connected: " + hookR_connected,
+                bigFont);
+        }
     }
+
+    #endregion
 
 }

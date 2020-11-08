@@ -6,6 +6,7 @@ public class DebugOptions
 {
     public static HookFireVariant hookFireVarient;
     public static bool hookJump;
+    public static bool debugText;
 
 }
 
