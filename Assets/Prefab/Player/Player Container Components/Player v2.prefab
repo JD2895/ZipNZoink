@@ -83,15 +83,19 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  accelerateValue: 0.07
-  decelerateValue: 0.125
-  maxGroundSpeed: 7
-  jumpForceMult: 38.3
+  accelerateValueHorizontal: 30
+  decelerateValueHorizontal: 50
+  maxGroundSpeedViaInput: 7
+  movementCancelHelper: 4
+  jumpForceMult: 38
   jumpCutoff: 4
-  airAccelerateValue: 0.02
-  maxAirSpeed: 6.5
+  jumpCancelGravityMult: 3
+  airAccelerateValue: 10
+  airDecelerateValue: 10
+  maxHorizontalAirSpeed: 7
   horHookMoveMult: 30
-  hookJumpForceMult: 35
+  hookJumpForceMult: 1.7
+  superHookJumpForceMult: 80
   playerSprite: {fileID: 8958772190431001816}
 --- !u!61 &8958772189174495754
 BoxCollider2D:

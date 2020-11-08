@@ -57,7 +57,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     /*** INPUT VARS ***/
     private float curHorInput = 0;
     private bool fireRightHook = false;
+    private bool unhookRightHook = false;
     private float reelRightHook = 0;
+    private bool unhookLeftHook = false;
     private bool fireLeftHook = false;
     private float reelLeftHook = 0;
     private bool jumpInput = false;
@@ -171,8 +173,10 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         jumpInput = Input.GetButtonDown("Jump");
         fireRightHook = Input.GetButtonDown("Right Hook Fire");
+        unhookRightHook = Input.GetButtonUp("Right Hook Fire");
         reelRightHook = Input.GetAxis("Right Hook Reel");
         fireLeftHook = Input.GetButtonDown("Left Hook Fire");
+        unhookLeftHook = Input.GetButtonUp("Left Hook Fire");
         reelLeftHook = Input.GetAxis("Left Hook Reel");
     }
 
@@ -208,12 +212,20 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             hookR_controller.FireHook(transform.up + transform.right);
         }
+        else if (unhookRightHook)
+        {
+            hookR_controller.DisconnectHook();
+        }
         hookR_controller.ReelHook(reelRightHook);
 
         // Left hook control
         if (fireLeftHook)
         {
             hookL_controller.FireHook(transform.up + -transform.right);
+        }
+        else if (unhookLeftHook)
+        {
+            hookL_controller.DisconnectHook();
         }
         hookL_controller.ReelHook(reelLeftHook);
     }
@@ -378,7 +390,6 @@ public class PlayerMovement_v3 : MonoBehaviour
         } else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
         {
             //ADD "SUPER JUMP" HERE
-            Debug.Log("Super Jump!");
             DetachHook.Invoke();
 
             isAirJumping = true;

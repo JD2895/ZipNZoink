@@ -75,6 +75,14 @@ public class HookController : MonoBehaviour
 
     public void FireHook(Vector2 firingDirection)
     {
+        /*// Disconnect and fire are one button press
+        DisconnectHook();
+        h_out = true;
+        h_Object.SetActive(true);
+        h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
+        */
+
+        // Disconnect and fire art two button presses
         if (!h_out)
         {   // If the hook isn't out yet, activate the hook and fire it
             h_out = true;
@@ -87,7 +95,7 @@ public class HookController : MonoBehaviour
         }
     }
 
-    private void DisconnectHook()
+    public void DisconnectHook()
     {
         h_out = false;
 
