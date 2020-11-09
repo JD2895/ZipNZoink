@@ -89,13 +89,14 @@ MonoBehaviour:
   movementCancelHelper: 4
   jumpForceMult: 38
   jumpCutoff: 4
-  jumpCancelGravityMult: 3
+  jumpCancelGravityMult: 2
   airAccelerateValue: 10
   airDecelerateValue: 10
   maxHorizontalAirSpeed: 7
-  horHookMoveMult: 30
-  hookJumpForceMult: 1.7
-  superHookJumpForceMult: 80
+  horHookMoveMult: 15
+  hookJumpForceMult: 30
+  hookJumpHorizMult: 0.7
+  superHookJumpForceMult: 60
   playerSprite: {fileID: 8958772190431001816}
 --- !u!61 &8958772189174495754
 BoxCollider2D:
