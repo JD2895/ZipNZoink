@@ -1362,26 +1362,6 @@ PrefabInstance:
       propertyPath: horAirMoveMult
       value: 6.44
       objectReference: {fileID: 0}
-    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
-        type: 3}
-      propertyPath: hookJumpForceMult
-      value: 30
-      objectReference: {fileID: 0}
-    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
-        type: 3}
-      propertyPath: jumpCancelGravityMult
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
-        type: 3}
-      propertyPath: superHookJumpForceMult
-      value: 70
-      objectReference: {fileID: 0}
-    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
-        type: 3}
-      propertyPath: hookJumpHorizMult
-      value: 0.7
-      objectReference: {fileID: 0}
     - target: {fileID: 7063008748857666291, guid: 6f1d33765dacff54a88f86962009978e,
         type: 3}
       propertyPath: m_LocalPosition.y
