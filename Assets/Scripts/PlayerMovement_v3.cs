@@ -35,6 +35,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float airAccelerateValue = 10;
     public float airDecelerateValue = 10;
     public float maxHorizontalAirSpeed = 7;
+    public float dashForceMult = 38.3f;
 
     [Header("Hook Movement")]
     public float horHookMoveMult = 30;
@@ -48,7 +49,8 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     /*** MOVEMENT HELPERS ***/
     private float horiToApply;
-    private bool jumpQueued;
+    private bool jumpQueued = false;
+    private bool dashQueued = false;
     private bool isAirJumping;
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
@@ -68,6 +70,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool fireLeftHook = false;
     private float reelLeftHook = 0;
     private bool jumpInput = false;
+    private bool dashDown = false;
 
     /*** VISUAL DATA ***/
     public SpriteRenderer playerSprite;
@@ -138,6 +141,12 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else
         {
+            // Down dash queueing 
+            if (!dashQueued)
+            {
+                dashQueued = dashDown;
+            }
+
             if (IsHooked())
             {
                 // Set defaults
@@ -207,6 +216,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         fireLeftHook = Input.GetButtonDown("Left Hook Fire");
         unhookLeftHook = Input.GetButtonUp("Left Hook Fire");
         reelLeftHook = Input.GetAxis("Left Hook Reel");
+        dashDown = Input.GetButtonDown("Cancel");
     }
 
     private bool IsGrounded()
@@ -286,7 +296,6 @@ public class PlayerMovement_v3 : MonoBehaviour
             {
                 ApplyHorizontalAirMovement();
             }
-
         }
         else
         {
@@ -294,6 +303,15 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
 
         JumpLogic();
+
+        if (dashQueued)
+        {
+            Debug.Log("dashing");
+            dashQueued = false;
+            Vector2 forceToApply = new Vector2(0, -1f * dashForceMult * Time.fixedDeltaTime);
+            rb.velocity = new Vector2(0, 0);
+            rb.AddForce(forceToApply, ForceMode2D.Impulse);
+        }
     }
 
     #region FixedUpdate Movement Methods

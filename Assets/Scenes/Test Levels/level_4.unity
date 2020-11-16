@@ -331,6 +331,11 @@ PrefabInstance:
       propertyPath: horAirMoveMult
       value: 6.44
       objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: dashForceMult
+      value: 60
+      objectReference: {fileID: 0}
     - target: {fileID: 7063008748857666291, guid: 6f1d33765dacff54a88f86962009978e,
         type: 3}
       propertyPath: m_LocalPosition.y

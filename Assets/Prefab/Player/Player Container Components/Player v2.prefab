@@ -87,13 +87,14 @@ MonoBehaviour:
   decelerateValueHorizontal: 50
   maxGroundSpeedViaInput: 7
   movementCancelHelper: 4
-  jumpForceMult: 38
+  jumpForceMult: 35
   jumpCutoff: 4
   jumpCancelGravityMult: 2
   airAccelerateValue: 10
   airDecelerateValue: 10
   maxHorizontalAirSpeed: 7
-  horHookMoveMult: 15
+  dashForceMult: 80
+  horHookMoveMult: 17
   hookJumpForceMult: 30
   hookJumpHorizMult: 0.7
   superHookJumpForceMult: 60
