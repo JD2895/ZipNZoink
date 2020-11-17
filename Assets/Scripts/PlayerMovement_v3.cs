@@ -46,6 +46,13 @@ public class PlayerMovement_v3 : MonoBehaviour
     bool isWallSliding = false;
     bool wallJumpQueued;
     int wallSide = 0;
+    //The speed the player slides down a wall
+    //Moving entirely by gravity with y set to 0
+    //NOTE might, if using values lower than 0, have to clamp to that value
+    public float wallSlideSpeed = 0.0f;
+    //The speed the player jumps off the wall in the x direction
+    public float wallJumpOffSpeed = 8.5f;
+
 
     /*** MOVEMENT HELPERS ***/
     private float horiToApply;
@@ -280,17 +287,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             }
             else if (isWallSliding)
             {
-                rb.velocity = new Vector2(rb.velocity.x, -0.7f);
-                if (wallJumpQueued)
-                {
-                    // Regular jump
-                    wallJumpQueued = false;
-                    directionWhenJumpStarted = directionFacing;
-
-                    ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
-                    curHorSpeed = -wallSide * 8.5f;
-                    isWallSliding = false;
-                }
+                HandleWallSliding();
             }
             else
             {
@@ -312,6 +309,33 @@ public class PlayerMovement_v3 : MonoBehaviour
             rb.velocity = new Vector2(0, 0);
             rb.AddForce(forceToApply, ForceMode2D.Impulse);
         }
+    }
+
+    private void HandleWallSliding()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, wallSlideSpeed);
+        if (wallJumpQueued)
+        {
+            // Regular jump
+            wallJumpQueued = false;
+            directionWhenJumpStarted = directionFacing;
+
+            ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
+            curHorSpeed = -wallSide * wallJumpOffSpeed;
+            isWallSliding = false;
+            rb.gravityScale = rbDefaultGravityScale;
+        }
+        else
+        {
+            //Get off the wall if the player presses away from it
+            if(curHorInput * wallSide < 0)
+            {
+                curHorSpeed = -wallSide * wallJumpOffSpeed;
+                isWallSliding = false;
+                rb.gravityScale = rbDefaultGravityScale;
+
+            }
+        }    
     }
 
     #region FixedUpdate Movement Methods
