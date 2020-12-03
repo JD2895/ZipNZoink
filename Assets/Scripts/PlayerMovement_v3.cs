@@ -29,7 +29,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float movementCancelHelper = 4;
 
     [Header("Air Movement")]
-    public float jumpForceMult = 38.3f;
+    public float jumpForce = 15.2f;
     public float jumpCutoff = 4;
     public float jumpCancelGravityMult = 1.5f;
     public float airAccelerateValue = 10;
@@ -52,6 +52,11 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float wallSlideSpeed = 0.0f;
     //The speed the player jumps off the wall in the x direction
     public float wallJumpOffSpeed = 8.5f;
+
+    //hangTime is used to allow the player a little bit of time to jump after walking off of a ledge 
+    public float hangTime = 0.2f;
+    //hangTimer does not need to be public, currently is public for testing
+    public float hangTimer;
 
 
     /*** MOVEMENT HELPERS ***/
@@ -139,6 +144,9 @@ public class PlayerMovement_v3 : MonoBehaviour
             rb.gravityScale = rbDefaultGravityScale;
             isAirJumping = false;
             isWallSliding = false;
+
+            hangTimer = hangTime;
+
             // Jump queueing 
             if (!jumpQueued)
             {
@@ -148,6 +156,9 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else
         {
+
+            hangTimer -= Time.deltaTime;
+
             // Down dash queueing 
             if (!dashQueued)
             {
@@ -164,12 +175,6 @@ public class PlayerMovement_v3 : MonoBehaviour
                 directionWhenJumpStarted = directionFacing; // temp fix
 
                 isWallSliding = false;
-
-
-                if (!jumpQueued)
-                {
-                    jumpQueued = jumpInput;
-                }
             }
             else if(isWallSliding)
             {
@@ -202,6 +207,15 @@ public class PlayerMovement_v3 : MonoBehaviour
                     wallSide = (int)curHorInput;
                 }
 
+            }
+        }
+
+        if (hangTimer > 0.0f)
+        {
+            // Jump queueing 
+            if (!jumpQueued)
+            {
+                jumpQueued = jumpInput;
             }
         }
 
@@ -320,7 +334,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             wallJumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
-            ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
+            ApplyJump(0, jumpForce);
             curHorSpeed = -wallSide * wallJumpOffSpeed;
             isWallSliding = false;
             rb.gravityScale = rbDefaultGravityScale;
@@ -450,15 +464,15 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void JumpLogic()
     {
-        if (jumpQueued && IsGrounded())
+        if (jumpQueued)
         {
+            hangTimer = 0.0f;
+
             // Regular jump
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
-            ApplyJump(0, jumpForceMult * Time.fixedDeltaTime);
-
-
+            ApplyJump(0, jumpForce);
         } 
         else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
@@ -493,9 +507,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void ApplyJump(float xforce, float yforce)
     {
-        Vector2 jumpVector = new Vector2(xforce, yforce);
-      //  rb.velocity = new Vector2(-8.5f, 15.2f);
-        rb.AddForce(jumpVector, ForceMode2D.Impulse);
+        rb.velocity = new Vector2(xforce, yforce);
     }
     
     #endregion

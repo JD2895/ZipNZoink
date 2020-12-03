@@ -311,6 +311,11 @@ PrefabInstance:
       propertyPath: superHookJumpForceMult
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 7063008748857666290, guid: 6f1d33765dacff54a88f86962009978e,
+        type: 3}
+      propertyPath: hangTime
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 7063008748857666291, guid: 6f1d33765dacff54a88f86962009978e,
         type: 3}
       propertyPath: m_LocalPosition.y
