@@ -58,10 +58,10 @@ public class PlayerMovement_v3 : MonoBehaviour
     //hangTimer does not need to be public, currently is public for testing
     public float hangTimer;
 
-
     /*** MOVEMENT HELPERS ***/
     private float horiToApply;
     private bool jumpQueued = false;
+    private bool spinFlipQueued = false;
     private bool dashQueued = false;
     private bool isAirJumping;
     private HoriDirection directionFacing;    // -1 is left, 1 is right
@@ -83,6 +83,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     private float reelLeftHook = 0;
     private bool jumpInput = false;
     private bool dashDown = false;
+    private bool spinFlip = false;
 
     /*** VISUAL DATA ***/
     public SpriteRenderer playerSprite;
@@ -152,7 +153,14 @@ public class PlayerMovement_v3 : MonoBehaviour
             {
                 jumpQueued = jumpInput;
             }
-
+            if (!spinFlipQueued)
+            {
+                if (spinFlip)
+                {
+                    jumpQueued = false;
+                    spinFlipQueued = spinFlip;
+                }
+            }
         }
         else
         {
@@ -217,6 +225,14 @@ public class PlayerMovement_v3 : MonoBehaviour
             {
                 jumpQueued = jumpInput;
             }
+            if (!spinFlipQueued)
+            {
+                if (spinFlip)
+                {
+                    jumpQueued = false;
+                    spinFlipQueued = spinFlip;
+                }
+            }
         }
 
         ControlHooks();
@@ -238,6 +254,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         unhookLeftHook = Input.GetButtonUp("Left Hook Fire");
         reelLeftHook = Input.GetAxis("Left Hook Reel");
         dashDown = Input.GetButtonDown("Cancel");
+        spinFlip = Input.GetKeyDown(KeyCode.X);
     }
 
     private bool IsGrounded()
@@ -502,6 +519,19 @@ public class PlayerMovement_v3 : MonoBehaviour
         } else if(jumpQueued && EvaluateHookState() == (int)HookedState.None)
         {
             jumpQueued = false;
+        }
+
+        if (spinFlipQueued)
+        {
+            hangTimer = 0.0f;
+
+            // Regular jump
+            spinFlipQueued = false;
+            directionWhenJumpStarted = directionFacing;
+
+            float jumpBackAmount = (float)directionFacing;
+
+            ApplyJump(jumpBackAmount * 200f, jumpForce);
         }
     }
 
