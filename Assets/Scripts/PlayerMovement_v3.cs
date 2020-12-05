@@ -58,6 +58,10 @@ public class PlayerMovement_v3 : MonoBehaviour
     //hangTimer does not need to be public, currently is public for testing
     public float hangTimer;
 
+    //Jump buffer adds a buffer when the player presses the jump button, which can help if the press the button "too early" while in the air
+    public float jumpBufferTime = 0.1f;
+    //like above does not need to be public, currently is for testing
+    public float jumpBufferTimer;
 
     /*** MOVEMENT HELPERS ***/
     private float horiToApply;
@@ -68,6 +72,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionWhenJumpStarted;
     private float rbDefaultGravityScale;
 
+    //Need to investigate how this works with air movement
     private float curHorSpeed; // Use inspector in debug mode to see this
 
     //Using to decelerate
@@ -147,12 +152,6 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             hangTimer = hangTime;
 
-            // Jump queueing 
-            if (!jumpQueued)
-            {
-                jumpQueued = jumpInput;
-            }
-
         }
         else
         {
@@ -210,6 +209,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             }
         }
 
+        //need to rework this, as jump que is not being used for ground jumps at all now
         if (hangTimer > 0.0f)
         {
             // Jump queueing 
@@ -217,6 +217,16 @@ public class PlayerMovement_v3 : MonoBehaviour
             {
                 jumpQueued = jumpInput;
             }
+        }
+
+        //to manage jump buffering
+        if(Input.GetButtonDown("Jump"))
+        {
+            jumpBufferTimer = jumpBufferTime;
+        }
+        else
+        {
+            jumpBufferTimer -= Time.deltaTime;
         }
 
         ControlHooks();
@@ -464,10 +474,10 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void JumpLogic()
     {
-        if (jumpQueued)
+        if(jumpBufferTimer >= 0 && hangTimer > 0)
         {
             hangTimer = 0.0f;
-
+            jumpBufferTimer = 0;
             // Regular jump
             jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
