@@ -154,16 +154,10 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             hangTimer = hangTime;
 
-            // Jump queueing 
-            if (!jumpQueued)
-            {
-                jumpQueued = jumpInput;
-            }
             if (!spinFlipQueued)
             {
                 if (spinFlip)
                 {
-                    jumpQueued = false;
                     spinFlipQueued = spinFlip;
                 }
             }
