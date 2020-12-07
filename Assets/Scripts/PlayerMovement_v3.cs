@@ -254,7 +254,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         unhookLeftHook = Input.GetButtonUp("Left Hook Fire");
         reelLeftHook = Input.GetAxis("Left Hook Reel");
         dashDown = Input.GetButtonDown("Cancel");
-        spinFlip = Input.GetKeyDown(KeyCode.X);
+        spinFlip = Input.GetButtonDown("Fire3");
     }
 
     private bool IsGrounded()
@@ -531,13 +531,40 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             float jumpBackAmount = (float)directionFacing;
 
-            ApplyJump(jumpBackAmount * 200f, jumpForce);
+            ApplyJump(0, jumpForce);
+            StartCoroutine("SpinPlayer");
         }
     }
 
     private void ApplyJump(float xforce, float yforce)
     {
         rb.velocity = new Vector2(xforce, yforce);
+    }
+
+    IEnumerator SpinPlayer()
+    {
+        rb.freezeRotation = false;
+
+        float timeToSpin = 0.5f;
+        float startTime = Time.time;
+        float fracComplete = (Time.time - startTime) / timeToSpin;
+        float newEuler = 0f;
+
+        while (fracComplete < 0.99f)
+        {
+            //newEuler = Mathf.Lerp(0f, 370f, fracComplete);
+            newEuler = Mathf.Lerp(0f, 360f, (1.6f + (1f / (-fracComplete - 0.65f))));
+            newEuler *= -1f * (float) directionWhenJumpStarted;
+            rb.MoveRotation(newEuler);
+            yield return null;
+            fracComplete = (Time.time - startTime) / timeToSpin;
+        }
+
+        // Reset rotation
+        rb.rotation = 0f;
+        yield return null;
+
+        rb.freezeRotation = true;
     }
     
     #endregion
