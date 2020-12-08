@@ -6,6 +6,8 @@ using UnityEngine.Events;
 
 public class PlayerMovement_v3 : MonoBehaviour
 {
+    #region Variables
+
     public static UnityEvent DetachHook;
 
     [Header("Hook Setup")]
@@ -28,10 +30,16 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float maxGroundSpeedViaInput = 7;
     public float movementCancelHelper = 4;
 
-    [Header("Air Movement")]
+    [Header("Jump Movement")]
     public float jumpForce = 15.2f;
     public float jumpCutoff = 4;
     public float jumpCancelGravityMult = 1.5f;
+    //Jump buffer adds a buffer when the player presses the jump button, which can help if the press the button "too early" while in the air
+    public float jumpBufferTime = 0.1f;
+    //like above does not need to be public, currently is for testing
+    public float jumpBufferTimer;
+
+    [Header("Air Movement")]
     public float airAccelerateValue = 10;
     public float airDecelerateValue = 10;
     public float maxHorizontalAirSpeed = 7;
@@ -43,28 +51,23 @@ public class PlayerMovement_v3 : MonoBehaviour
     public float hookJumpHorizMult = 0.7f;
     public float superHookJumpForceMult = 10;
 
-    bool isWallSliding = false;
-    bool wallJumpQueued;
-    int wallSide = 0;
+    [Header("Wall Movement")]
     //The speed the player slides down a wall
     //Moving entirely by gravity with y set to 0
-    //NOTE might, if using values lower than 0, have to clamp to that value
+    //NOTE: might, if using values lower than 0, have to clamp to that value
     public float wallSlideSpeed = 0.0f;
     //The speed the player jumps off the wall in the x direction
     public float wallJumpOffSpeed = 8.5f;
-
     //hangTime is used to allow the player a little bit of time to jump after walking off of a ledge 
     public float hangTime = 0.2f;
     //hangTimer does not need to be public, currently is public for testing
     public float hangTimer;
+    private bool isWallSliding = false;
+    private bool wallJumpQueued;
+    private int wallSide = 0;
 
-    //Jump buffer adds a buffer when the player presses the jump button, which can help if the press the button "too early" while in the air
-    public float jumpBufferTime = 0.1f;
-    //like above does not need to be public, currently is for testing
-    public float jumpBufferTimer;
-
-    /*** MOVEMENT HELPERS ***/
-    private float horiToApply;
+    [Header("Movement Helpers")]
+    private float hookSwingToApply;
     private bool jumpQueued = false;
     private bool spinFlipQueued = false;
     private bool dashQueued = false;
@@ -72,14 +75,10 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
     private float rbDefaultGravityScale;
-
-    //Need to investigate how this works with air movement
+    //TODO: Need to investigate how this works with air movement
     private float curHorSpeed; // Use inspector in debug mode to see this
 
-    //Using to decelerate
-    private float halfSpeed;
-
-    /*** INPUT VARS ***/
+    [Header("Input Containers")]
     private float curHorInput = 0;
     private bool fireRightHook = false;
     private bool unhookRightHook = false;
@@ -92,7 +91,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool spinFlip = false;
 
     /*** VISUAL DATA ***/
-    public SpriteRenderer playerSprite;
+    private SpriteRenderer playerSprite;
+    
+    #endregion
 
     #region Initialization Methods
 
@@ -118,12 +119,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         rbDefaultGravityScale = rb.gravityScale;
 
-        //playerSprite = this.GetComponent<SpriteRenderer>();
+        playerSprite = this.GetComponentInChildren<SpriteRenderer>();
     }
 
     private void Start()
     {
-        halfSpeed = maxGroundSpeedViaInput * 0.5f;
         curHorSpeed = 0.0f;
     }
     #endregion
@@ -143,7 +143,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             playerSprite.flipX = true;
         }
 
-        horiToApply = 0;
+        hookSwingToApply = 0;
 
         if (IsGrounded())
         {
@@ -154,6 +154,12 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             hangTimer = hangTime;
 
+            if (jumpBufferTimer >= 0)
+            {
+                jumpBufferTimer = 0;
+                jumpQueued = true;
+            }
+            
             if (!spinFlipQueued)
             {
                 if (spinFlip)
@@ -164,7 +170,6 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else
         {
-
             hangTimer -= Time.deltaTime;
 
             // Down dash queueing 
@@ -179,8 +184,13 @@ public class PlayerMovement_v3 : MonoBehaviour
                 rb.gravityScale = rbDefaultGravityScale;
 
                 curHorSpeed = rb.velocity.x;
-                horiToApply = curHorInput * horHookMoveMult;
-                directionWhenJumpStarted = directionFacing; // temp fix
+                hookSwingToApply = curHorInput * horHookMoveMult;
+                //directionWhenJumpStarted = directionFacing; // temp fix
+
+                if (!jumpQueued)
+                {
+                    jumpQueued = jumpInput;
+                }
 
                 isWallSliding = false;
             }
@@ -194,7 +204,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             //In the air, unhooked
             else
             {
-                if (Input.GetButtonUp("Jump") && !isAirJumping)
+                if (!Input.GetButton("Jump") && !isAirJumping)
                 {
                     if (rb.velocity.y > jumpCutoff)
                     {
@@ -217,20 +227,19 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             }
         }
-
-        //need to rework this, as jump que is not being used for ground jumps at all now
+        // Hang time
         if (hangTimer > 0.0f)
         {
-            // Jump queueing 
             if (!jumpQueued)
             {
                 jumpQueued = jumpInput;
             }
         }
 
-        //to manage jump buffering
-        if(Input.GetButtonDown("Jump"))
+        // Jump buffering
+        if(jumpInput && !IsHooked())
         {
+            //Debug.Log("Jump Buffering");
             jumpBufferTimer = jumpBufferTime;
         }
         else
@@ -316,7 +325,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             if (IsHooked())
             {
-                Vector2 forceToApply = new Vector2(horiToApply * Time.fixedDeltaTime, 0);
+                Vector2 forceToApply = new Vector2(hookSwingToApply * Time.fixedDeltaTime, 0);
                 rb.AddForce(forceToApply);
             }
             else if (isWallSliding)
@@ -484,55 +493,50 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void JumpLogic()
     {
-        if(jumpBufferTimer >= 0 && hangTimer > 0)
+        // Ground Jump
+        if (jumpQueued && EvaluateHookState() == (int)HookedState.None)
         {
+            //Debug.Log("Regular Jump");
+            jumpQueued = false;
             hangTimer = 0.0f;
             jumpBufferTimer = 0;
-            // Regular jump
-            jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
             ApplyJump(0, jumpForce);
         } 
+        // Hook Jump
         else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
-            // Hook jump
             //Debug.Log("Hook Jump!");
+            jumpQueued = false;
             DetachHook.Invoke();
 
             isAirJumping = true;
-            jumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
             rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
-            ApplyJump(0, hookJumpForceMult * Time.fixedDeltaTime);
-            
+            ApplyJump(0, hookJumpForceMult);
 
-        } else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
+
+        }
+        // Super Jump
+        else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
         {
-            //ADD "SUPER JUMP" HERE
+            //Debug.Log("Super Hook Jump!!!");
             DetachHook.Invoke();
 
             isAirJumping = true;
             jumpQueued = false;
 
             rb.velocity = Vector2.zero;
-            ApplyJump(0, superHookJumpForceMult * Time.fixedDeltaTime);
-
-        } else if(jumpQueued && EvaluateHookState() == (int)HookedState.None)
-        {
-            jumpQueued = false;
+            ApplyJump(0, superHookJumpForceMult);
         }
 
+        // Flip Jump
         if (spinFlipQueued)
         {
-            hangTimer = 0.0f;
-
-            // Regular jump
             spinFlipQueued = false;
             directionWhenJumpStarted = directionFacing;
-
-            float jumpBackAmount = (float)directionFacing;
 
             ApplyJump(0, jumpForce);
             StartCoroutine("SpinPlayer");
@@ -541,7 +545,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void ApplyJump(float xforce, float yforce)
     {
-        rb.velocity = new Vector2(xforce, yforce);
+        rb.velocity += new Vector2(xforce, yforce);
     }
 
     IEnumerator SpinPlayer()

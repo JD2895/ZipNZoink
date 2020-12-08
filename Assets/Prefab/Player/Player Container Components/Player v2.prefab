@@ -87,18 +87,23 @@ MonoBehaviour:
   decelerateValueHorizontal: 50
   maxGroundSpeedViaInput: 7
   movementCancelHelper: 4
-  jumpForceMult: 35
+  jumpForce: 15.2
   jumpCutoff: 4
   jumpCancelGravityMult: 2
+  jumpBufferTime: 0.1
+  jumpBufferTimer: -1
   airAccelerateValue: 10
   airDecelerateValue: 10
   maxHorizontalAirSpeed: 7
-  dashForceMult: 80
+  dashForceMult: 55
   horHookMoveMult: 17
-  hookJumpForceMult: 30
+  hookJumpForceMult: 10
   hookJumpHorizMult: 0.7
-  superHookJumpForceMult: 60
-  playerSprite: {fileID: 8958772190431001816}
+  superHookJumpForceMult: 24
+  wallSlideSpeed: 0
+  wallJumpOffSpeed: 8.5
+  hangTime: 0.2
+  hangTimer: 0
 --- !u!61 &8958772189174495754
 BoxCollider2D:
   m_ObjectHideFlags: 0
