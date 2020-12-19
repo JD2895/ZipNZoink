@@ -89,7 +89,7 @@ MonoBehaviour:
   movementCancelHelper: 4
   jumpForce: 15.2
   jumpCutoff: 4
-  jumpCancelGravityMult: 2
+  jumpCancelGravityMult: 1.8
   jumpBufferTime: 0.1
   jumpBufferTimer: -1
   airAccelerateValue: 10
@@ -99,7 +99,7 @@ MonoBehaviour:
   horHookMoveMult: 17
   hookJumpForceMult: 10
   hookJumpHorizMult: 0.7
-  superHookJumpForceMult: 24
+  superHookJumpForceMult: 26
   wallSlideSpeed: 0
   wallJumpOffSpeed: 8.5
   hangTime: 0.2

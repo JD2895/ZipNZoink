@@ -98,14 +98,11 @@ public class HookController : MonoBehaviour
             h_Object.SetActive(true);
             h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
         }
-        
-
     }
 
     public void DisconnectHook()
     {
         h_out = false;
-
         ChangeHookConnectedState(false);
         h_Object.SetActive(false);
         h_onGround = false;

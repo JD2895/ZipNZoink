@@ -17,6 +17,7 @@ public class HookHelper : MonoBehaviour
     private bool firing = false;
     private Vector2 nextPosition;
     private Vector2 firingDirection = new Vector2();
+    private Transform origParent;
 
     #region Platform Interaction Variables
 
@@ -28,6 +29,19 @@ public class HookHelper : MonoBehaviour
     private bool hookAttached;
     private bool targetMoving;
     #endregion
+
+    private void Start()
+    {
+        origParent = this.transform.parent;
+    }
+
+    private void OnEnable()
+    {
+        if(origParent != null)
+        {
+            this.transform.SetParent(origParent);
+        }
+    }
 
     private void FixedUpdate()
     {        
@@ -79,6 +93,7 @@ public class HookHelper : MonoBehaviour
 
             transform.position = targetLastPos + hookOffset;
 
+            this.transform.SetParent(collision.transform);
 
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
