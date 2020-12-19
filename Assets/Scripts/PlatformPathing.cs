@@ -10,7 +10,7 @@ public class PlatformPathing : MonoBehaviour
     public PathCreator path;
 
     [SerializeField]
-    private float pathSpeed;
+    private float pathSpeed = 5f;
     private float distanceTravelled;
 
     // Start is called before the first frame update
