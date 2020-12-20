@@ -65,6 +65,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool isWallSliding = false;
     private bool wallJumpQueued;
     private int wallSide = 0;
+    public float curHorSpeed; // Use inspector in debug mode to see this
+    public Vector2 watchthis;
 
     [Header("Movement Helpers")]
     private float hookSwingToApply;
@@ -76,7 +78,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionWhenJumpStarted;
     private float rbDefaultGravityScale;
     //TODO: Need to investigate how this works with air movement
-    private float curHorSpeed; // Use inspector in debug mode to see this
+
+
 
     [Header("Input Containers")]
     private float curHorInput = 0;
@@ -92,6 +95,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     /*** VISUAL DATA ***/
     private SpriteRenderer playerSprite;
+
     
     #endregion
 
@@ -216,13 +220,22 @@ public class PlayerMovement_v3 : MonoBehaviour
                 //To make sure the player doesn't get stuck on small blocks
                 if (rb.velocity.y < 12.0f)
                 {
-                    float distance = 0.03f;
-                    Vector3 castOrigin = bottomCollider.bounds.center;
-                    Vector2 castSize = new Vector2(bottomCollider.radius * 2, bottomCollider.radius * 2);
-                    RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2(curHorInput, 0.0f), distance, groundLayer);
+                    if (curHorInput != 0)
+                    {
+                        float distance = 0.03f;
+                        Vector3 castOrigin = bottomCollider.bounds.center;
+                        Vector2 castSize = new Vector2(bottomCollider.radius * 2, bottomCollider.radius * 2);
+                        RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0.0f), distance, groundLayer);
 
-                    isWallSliding = raycastHit.collider != null;
-                    wallSide = (int)curHorInput;
+                        isWallSliding = raycastHit.collider != null;
+                        if (isWallSliding)
+                        {
+                            //Using this to correct for oddities with adjusting the gravity scale above
+                            rb.gravityScale = rbDefaultGravityScale;
+
+                            wallSide = (int)directionFacing;
+                        }
+                    }
                 }
 
             }
@@ -248,6 +261,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
 
         ControlHooks();
+        watchthis = rb.velocity;
     }
 
     private void CheckInput()
@@ -358,7 +372,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void HandleWallSliding()
     {
-        rb.velocity = new Vector2(rb.velocity.x, wallSlideSpeed);
+        rb.velocity = new Vector2(0, wallSlideSpeed);
         if (wallJumpQueued)
         {
             // Regular jump
