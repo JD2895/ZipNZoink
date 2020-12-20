@@ -89,7 +89,7 @@ MonoBehaviour:
   movementCancelHelper: 4
   jumpForce: 15.2
   jumpCutoff: 4
-  jumpCancelGravityMult: 1.8
+  jumpCancelGravityMult: 2
   jumpBufferTime: 0.1
   jumpBufferTimer: -1
   airAccelerateValue: 10

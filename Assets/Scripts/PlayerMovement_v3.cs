@@ -303,6 +303,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else if (unhookRightHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
         {
+            isAirJumping = true;    //temp fix? to avoid accidental jump cancelling. might be fixed with state machine?
             hookR_controller.DisconnectHook();
         }
         hookR_controller.ReelHook(reelRightHook);
@@ -314,6 +315,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
         else if (unhookLeftHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
         {
+            isAirJumping = true;    //temp fix? to avoid accidental jump cancelling. might be fixed with state machine?
             hookL_controller.DisconnectHook();
         }
         hookL_controller.ReelHook(reelLeftHook);
@@ -580,6 +582,9 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void HookHitGround(HookSide hookSide)
     {
+        // Cancel any jump cancelling that might have been happening
+        isAirJumping = false;
+
         if (hookSide == HookSide.Right)
         {
             hookR_controller.ChangeHookConnectedState(true);
