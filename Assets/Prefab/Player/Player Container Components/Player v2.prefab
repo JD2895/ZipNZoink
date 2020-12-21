@@ -74,7 +74,7 @@ MonoBehaviour:
   hookR_Object: {fileID: 0}
   hookL_Object: {fileID: 0}
   commonHookData:
-    minJointDistance: 0.5
+    minJointDistance: 1
     inputReelMinimum: 0.05
     maxReelSpeed: 5
     timeToMaxReelSpeed: 1
@@ -104,6 +104,8 @@ MonoBehaviour:
   wallJumpOffSpeed: 8.5
   hangTime: 0.2
   hangTimer: 0
+  curHorSpeed: 0
+  watchthis: {x: 0, y: 0}
 --- !u!61 &8958772189174495754
 BoxCollider2D:
   m_ObjectHideFlags: 0

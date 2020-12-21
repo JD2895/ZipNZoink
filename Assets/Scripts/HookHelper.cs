@@ -43,8 +43,15 @@ public class HookHelper : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        hookAttached = false;
+        //collisionObj = null;
+        rb.freezeRotation = false;
+    }
+
     private void FixedUpdate()
-    {        
+    {    
         if (firing && !hitGround)
         {
             nextPosition = this.transform.position;
@@ -61,8 +68,8 @@ public class HookHelper : MonoBehaviour
         hitGround = false;
         this.transform.eulerAngles = new Vector3(0f, 0f, Vector2.SignedAngle(Vector2.up, firingDirection));
         rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.freezeRotation = true;
     }
-
 
     //Called while the Hook is touching a Ground collider
     //Moves the hook to match the position of the collider if the collider is moving
@@ -78,11 +85,11 @@ public class HookHelper : MonoBehaviour
         targetLastPos = collisionPos;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && !hookAttached)
         {
-            //Debug.Log("Hook Hit Ground");
+            Debug.Log("Hook Hit Ground");
             hitGround = true;
             firing = false;
             hookAttached = true;
@@ -100,6 +107,7 @@ public class HookHelper : MonoBehaviour
         }
     }
 
+    /*
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject == collisionObj && hookAttached)
@@ -107,7 +115,9 @@ public class HookHelper : MonoBehaviour
             AlignHookWithGround(collision.transform.position);
         }
     }
+    */
 
+    /*
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject == collisionObj)
@@ -120,6 +130,7 @@ public class HookHelper : MonoBehaviour
         }
 
     }
+    */
 
     private GUIStyle bigFont = new GUIStyle();
 

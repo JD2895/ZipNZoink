@@ -10,6 +10,7 @@ public class HookController : MonoBehaviour
     private float maxReelSpeed;         // The maximum speed the player can reach while reeling in a connected hook.
     private float timeToMaxReelSpeed;   // The time it takes to reach the maximum reel speed.
     private float inputReelMinimum;     // The minimum input that needs to be registered before reeling happens (for controller trigger deadzones).
+    private float minJointDistance;     // The smallest size the joint can get to.
     // Physics
     private DistanceJoint2D h_Joint;    // The hinge joint that is the basis of all the swing/reel mechanics.
     private float reelPerSec;           // The amount of 'reeling' to apply per second if reeling is happening. reelPerSec = maxReelSpeed / timeToMaxReelSpeed.
@@ -26,7 +27,11 @@ public class HookController : MonoBehaviour
         if(h_onGround)
         {
             // Reduce joint length by reel amount
-            h_Joint.distance -= reelToApply * Time.fixedDeltaTime;
+            float newJointDistance = h_Joint.distance - reelToApply * Time.fixedDeltaTime;
+            if (newJointDistance <= minJointDistance)
+                h_Joint.distance = minJointDistance;
+            else
+                h_Joint.distance -= reelToApply * Time.fixedDeltaTime;
             // This next bit is needed to prevent a bug that causes reeling to not work if the player collided with the ground while swinging
             h_Joint.enabled = false;
             h_Joint.enabled = true;
@@ -54,6 +59,7 @@ public class HookController : MonoBehaviour
         inputReelMinimum = newHookCommonData.inputReelMinimum;
         maxReelSpeed = newHookCommonData.maxReelSpeed;
         timeToMaxReelSpeed = newHookCommonData.timeToMaxReelSpeed;
+        minJointDistance = newHookCommonData.minJointDistance;
         // Line (drawing) setup
         h_LineContainer = new GameObject("HookLine");
         h_LineContainer.transform.parent = newHookCommonData.controllerParent.transform;
