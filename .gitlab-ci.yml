@@ -29,9 +29,9 @@ build-StandaloneWindows64:
     key: "$CI_PROJECT_NAMESPACE-$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG-$TEST_PLATFORM"
     paths:
       - $UNITY_DIR/Library/
-  rules:
-    - if: '$UNITY_LICENSE != null'
-      when: always
+#  rules:
+#    - if: '$UNITY_LICENSE != null'
+#      when: always
   script:
     - chmod +x ./ci/build.sh && ./ci/build.sh
   artifacts:
