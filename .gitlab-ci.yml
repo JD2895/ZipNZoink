@@ -12,7 +12,6 @@ variables:
   IMAGE_VERSION: "0.7" # https://github.com/Unity-CI/docker/releases
   UNITY_DIR: $CI_PROJECT_DIR # this needs to be an absolute path. Defaults to the root of your tree.
 
-
 image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
 
 .unity_before_script: &unity_before_script
@@ -35,7 +34,7 @@ image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
 get-activation-file:
   rules:
     - if: '$UNITY_LICENSE == null'
-#      when: manual
+      when: manual
   stage: build_and_test
   script:
     - chmod +x ./ci/get_activation_file.sh && ./ci/get_activation_file.sh
@@ -86,11 +85,32 @@ test-editmode:
   tags:
     - gitlab-org
 
-build-StandaloneOSX:
-  <<: *build
-  image: $IMAGE:$UNITY_VERSION-mac-mono-$IMAGE_VERSION
-  variables:
-    BUILD_TARGET: StandaloneOSX
+#build-StandaloneLinux64:
+#  <<: *build
+#  variables:
+#    BUILD_TARGET: StandaloneLinux64
+
+# linux il2cpp currently unsupported, see https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
+#build-StandaloneLinux64-il2cpp:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-linux-il2cpp-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: StandaloneLinux64
+#    SCRIPTING_BACKEND: IL2CPP
+#    # https://forum.unity.com/threads/linux-il2cpp-linux-sysroot-not-specified-or-does-not-exist.854008/
+#    IL2CPP_ADDITIONAL_ARGS: "--sysroot-path=/ --tool-chain-path=/"
+
+#build-StandaloneOSX:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-mac-mono-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: StandaloneOSX
+
+#Note: build target names changed in recent versions, use this for versions < 2017.2:
+# build-StandaloneOSXUniversal:
+#   <<: *build
+#   variables:
+#     BUILD_TARGET: StandaloneOSXUniversal
 
 build-StandaloneWindows64:
   <<: *build
@@ -98,3 +118,57 @@ build-StandaloneWindows64:
   variables:
     BUILD_TARGET: StandaloneWindows64
 
+# webgl is currently unsupported, see https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
+#build-WebGL:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-webgl-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: WebGL
+
+#build-android:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-android-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: Android
+#    BUNDLE_VERSION_CODE: $CI_PIPELINE_IID
+#    BUILD_APP_BUNDLE: "false"
+
+#deploy-android:
+#  stage: deploy
+#  image: ruby
+#  script:
+#    - cd $UNITY_DIR/Builds/Android
+#    - echo $GPC_TOKEN > gpc_token.json
+#    - gem install bundler
+#    - bundle install
+#    - fastlane supply --aab $BUILD_NAME.aab --track internal --package_name com.youcompany.yourgame --json_key ./gpc_token.json
+#  needs: ["build-android"]
+
+#build-ios-xcode:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-ios-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: iOS
+
+#build-and-deploy-ios:
+#  stage: deploy
+#  script:
+#    - cd $UNITY_DIR/Builds/iOS/$BUILD_NAME
+#    - pod install
+#    - fastlane ios beta
+#  tags:
+#    - ios
+#    - mac
+#  needs: ["build-ios-xcode"]
+
+# Deploying webgl is currently unsupported due to https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
+#pages:
+#  image: alpine:latest
+#  stage: deploy
+#  script:
+#    - mv "$UNITY_DIR/Builds/WebGL/${BUILD_NAME}" public
+#  artifacts:
+#    paths:
+#      - public
+#  only:
+#    - master
