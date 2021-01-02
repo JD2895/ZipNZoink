@@ -70,7 +70,7 @@ test-editmode:
   variables:
     TEST_PLATFORM: editmode
 
-build: &build
+.build: &build
   stage: build_and_test
   <<: *unity_before_script
   <<: *cache
@@ -85,10 +85,10 @@ build: &build
   tags:
     - gitlab-org
 
-#build-StandaloneLinux64:
-#  <<: *build
-#  variables:
-#    BUILD_TARGET: StandaloneLinux64
+build-StandaloneLinux64:
+  <<: *build
+  variables:
+    BUILD_TARGET: StandaloneLinux64
 
 # linux il2cpp currently unsupported, see https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
 #build-StandaloneLinux64-il2cpp:
@@ -100,11 +100,11 @@ build: &build
 #    # https://forum.unity.com/threads/linux-il2cpp-linux-sysroot-not-specified-or-does-not-exist.854008/
 #    IL2CPP_ADDITIONAL_ARGS: "--sysroot-path=/ --tool-chain-path=/"
 
-#build-StandaloneOSX:
-#  <<: *build
-#  image: $IMAGE:$UNITY_VERSION-mac-mono-$IMAGE_VERSION
-#  variables:
-#    BUILD_TARGET: StandaloneOSX
+build-StandaloneOSX:
+  <<: *build
+  image: $IMAGE:$UNITY_VERSION-mac-mono-$IMAGE_VERSION
+  variables:
+    BUILD_TARGET: StandaloneOSX
 
 #Note: build target names changed in recent versions, use this for versions < 2017.2:
 # build-StandaloneOSXUniversal:
@@ -125,13 +125,13 @@ build-StandaloneWindows64:
 #  variables:
 #    BUILD_TARGET: WebGL
 
-#build-android:
-#  <<: *build
-#  image: $IMAGE:$UNITY_VERSION-android-$IMAGE_VERSION
-#  variables:
-#    BUILD_TARGET: Android
-#    BUNDLE_VERSION_CODE: $CI_PIPELINE_IID
-#    BUILD_APP_BUNDLE: "false"
+build-android:
+  <<: *build
+  image: $IMAGE:$UNITY_VERSION-android-$IMAGE_VERSION
+  variables:
+    BUILD_TARGET: Android
+    BUNDLE_VERSION_CODE: $CI_PIPELINE_IID
+    BUILD_APP_BUNDLE: "false"
 
 #deploy-android:
 #  stage: deploy
@@ -144,11 +144,11 @@ build-StandaloneWindows64:
 #    - fastlane supply --aab $BUILD_NAME.aab --track internal --package_name com.youcompany.yourgame --json_key ./gpc_token.json
 #  needs: ["build-android"]
 
-#build-ios-xcode:
-#  <<: *build
-#  image: $IMAGE:$UNITY_VERSION-ios-$IMAGE_VERSION
-#  variables:
-#    BUILD_TARGET: iOS
+build-ios-xcode:
+  <<: *build
+  image: $IMAGE:$UNITY_VERSION-ios-$IMAGE_VERSION
+  variables:
+    BUILD_TARGET: iOS
 
 #build-and-deploy-ios:
 #  stage: deploy
