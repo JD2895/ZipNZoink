@@ -1,4 +1,5 @@
 stages:
+  - check_temp
   - build_and_test
   - deploy
 
@@ -13,6 +14,11 @@ variables:
   UNITY_DIR: $CI_PROJECT_DIR # this needs to be an absolute path. Defaults to the root of your tree.
 
 image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
+
+trythis:
+  stage: check_temp
+  script:
+    - echo 'doeswork'
 
 .unity_before_script: &unity_before_script
   before_script:
