@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Hook
+  - DebugMenu
+  - Coin
   layers:
   - Default
   - TransparentFX
@@ -16,7 +19,7 @@ TagManager:
   - 
   - Ground
   - Hook
-  - 
+  - Hazard
   - 
   - 
   - 
@@ -41,4 +44,7 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Debug
+    uniqueID: 1745921073
     locked: 0

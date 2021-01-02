@@ -54,10 +54,10 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0
   m_GravityScale: 5
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: f45eb5accdb9db544815c3736f86bdbf, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &8958772189174495764
 MonoBehaviour:
@@ -74,7 +74,7 @@ MonoBehaviour:
   hookR_Object: {fileID: 0}
   hookL_Object: {fileID: 0}
   commonHookData:
-    minJointDistance: 0.5
+    minJointDistance: 1
     inputReelMinimum: 0.05
     maxReelSpeed: 5
     timeToMaxReelSpeed: 1
@@ -83,19 +83,29 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  jumpForceMult: 45
-  horMoveMult: 200
-  horAirMoveMult: 20
-  horReverseAirMoveMult: 250
-  horHookMoveMult: 30
-  maxSpeed: 15
+  accelerateValueHorizontal: 30
+  decelerateValueHorizontal: 50
+  maxGroundSpeedViaInput: 7
+  movementCancelHelper: 4
+  jumpForce: 15.2
   jumpCutoff: 4
-  accelerateValue: 0.125
-  decelerateValue: 0.125
-  airAccelerateValue: 0.125
-  maxAirSpeed: 15
-  currentSpeed: 0
-  playerSprite: {fileID: 8958772190431001816}
+  jumpCancelGravityMult: 2
+  jumpBufferTime: 0.1
+  jumpBufferTimer: -1
+  airAccelerateValue: 10
+  airDecelerateValue: 10
+  maxHorizontalAirSpeed: 7
+  dashForceMult: 55
+  horHookMoveMult: 17
+  hookJumpForceMult: 10
+  hookJumpHorizMult: 0.7
+  superHookJumpForceMult: 26
+  wallSlideSpeed: 0
+  wallJumpOffSpeed: 8.5
+  hangTime: 0.2
+  hangTimer: 0
+  curHorSpeed: 0
+  watchthis: {x: 0, y: 0}
 --- !u!61 &8958772189174495754
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -109,7 +119,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.19}
+  m_Offset: {x: 0, y: 0.16}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -120,7 +130,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.85, y: 0.62}
+  m_Size: {x: 0.85, y: 0.55}
   m_EdgeRadius: 0
 --- !u!58 &8958772189174495753
 CircleCollider2D:
@@ -135,7 +145,7 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.07}
+  m_Offset: {x: 0, y: -0.0698}
   serializedVersion: 2
   m_Radius: 0.43
 --- !u!1 &8958772189708179093
