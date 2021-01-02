@@ -118,11 +118,28 @@ build-StandaloneOSX:
 #   variables:
 #     BUILD_TARGET: StandaloneOSXUniversal
 
+#temptry
 build-StandaloneWindows64:
-  <<: *build
+  stage: build_and_test
+  <<: *unity_before_script
+  <<: *cache
+  <<: *license
+  script:
+    - chmod +x ./ci/build.sh && ./ci/build.sh
+  artifacts:
+    paths:
+      - $UNITY_DIR/Builds/
+  tags:
+    - gitlab-org
   image: $IMAGE:$UNITY_VERSION-windows-mono-$IMAGE_VERSION
   variables:
     BUILD_TARGET: StandaloneWindows64
+
+#build-StandaloneWindows64:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-windows-mono-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: StandaloneWindows64
 
 # webgl is currently unsupported, see https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
 #build-WebGL:
