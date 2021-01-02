@@ -70,7 +70,7 @@ test-editmode:
   variables:
     TEST_PLATFORM: editmode
 
-.build: &build
+build: &build
   stage: build_and_test
   <<: *unity_before_script
   <<: *cache
