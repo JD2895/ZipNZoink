@@ -20,6 +20,29 @@ trythis:
   script:
     - echo 'doeswork'
 
+#temptry
+build-StandaloneWindows64:
+  stage: check_temp
+  before_script:
+    - chmod +x ./ci/before_script.sh && ./ci/before_script.sh
+  cache:
+    key: "$CI_PROJECT_NAMESPACE-$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG-$TEST_PLATFORM"
+    paths:
+      - $UNITY_DIR/Library/
+  rules:
+    - if: '$UNITY_LICENSE != null'
+      when: always
+  script:
+    - chmod +x ./ci/build.sh && ./ci/build.sh
+  artifacts:
+    paths:
+      - $UNITY_DIR/Builds/
+  tags:
+    - gitlab-org
+  image: $IMAGE:$UNITY_VERSION-windows-mono-$IMAGE_VERSION
+  variables:
+    BUILD_TARGET: StandaloneWindows64
+
 .unity_before_script: &unity_before_script
   before_script:
     - chmod +x ./ci/before_script.sh && ./ci/before_script.sh
@@ -60,8 +83,6 @@ get-activation-file:
     paths:
       - $UNITY_DIR/$TEST_PLATFORM-results.xml
       - $UNITY_DIR/$TEST_PLATFORM-coverage/
-  # https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/83
-  # you may need to remove or replace these to fit your need if you are using your own runners
   tags:
     - gitlab-org
   coverage: /<Linecoverage>(.*?)</Linecoverage>/
@@ -78,18 +99,23 @@ test-editmode:
 
 .build: &build
   stage: build_and_test
-  <<: *unity_before_script
-  <<: *cache
-  <<: *license
+  before_script:
+    - chmod +x ./ci/before_script.sh && ./ci/before_script.sh
+  cache:
+    key: "$CI_PROJECT_NAMESPACE-$CI_PROJECT_NAME-$CI_COMMIT_REF_SLUG-$TEST_PLATFORM"
+    paths:
+      - $UNITY_DIR/Library/
+  rules:
+    - if: '$UNITY_LICENSE != null'
+      when: always
   script:
     - chmod +x ./ci/build.sh && ./ci/build.sh
   artifacts:
     paths:
       - $UNITY_DIR/Builds/
-  # https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/83
-  # you may need to remove or replace these to fit your need if you are using your own runners
   tags:
     - gitlab-org
+
 
 build-StandaloneLinux64:
   <<: *build
@@ -117,23 +143,6 @@ build-StandaloneOSX:
 #   <<: *build
 #   variables:
 #     BUILD_TARGET: StandaloneOSXUniversal
-
-#temptry
-build-StandaloneWindows64:
-  stage: build_and_test
-  <<: *unity_before_script
-  <<: *cache
-  <<: *license
-  script:
-    - chmod +x ./ci/build.sh && ./ci/build.sh
-  artifacts:
-    paths:
-      - $UNITY_DIR/Builds/
-  tags:
-    - gitlab-org
-  image: $IMAGE:$UNITY_VERSION-windows-mono-$IMAGE_VERSION
-  variables:
-    BUILD_TARGET: StandaloneWindows64
 
 #build-StandaloneWindows64:
 #  <<: *build
