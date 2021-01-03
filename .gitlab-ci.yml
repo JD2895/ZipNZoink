@@ -30,6 +30,8 @@ image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
   rules:
     - if: '$UNITY_LICENSE != null'
       when: always
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: never
 
 # run this job when you need to request a license
 # you may need to follow activation steps from documentation
@@ -61,8 +63,6 @@ get-activation-file:
   tags:
     - gitlab-org
   coverage: /<Linecoverage>(.*?)</Linecoverage>/
-  only:
-    - master
 
 test-playmode:
   <<: *test
@@ -88,8 +88,6 @@ test-editmode:
   # you may need to remove or replace these to fit your need if you are using your own runners
   tags:
     - gitlab-org
-  only:
-    - master
 
 #build-StandaloneLinux64:
 #  <<: *build
