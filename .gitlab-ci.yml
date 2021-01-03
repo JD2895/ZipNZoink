@@ -11,7 +11,7 @@ variables:
   IMAGE: unityci/editor # https://hub.docker.com/r/unityci/editor
   IMAGE_VERSION: "0.7" # https://github.com/Unity-CI/docker/releases
   UNITY_DIR: $CI_PROJECT_DIR # this needs to be an absolute path. Defaults to the root of your tree.
-  ITCH_USER: j.davis.2895@gmail.com
+  ITCH_USER: JD2895
   ITCH_PROJECT: Zip-N-Zoink
 
 image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
