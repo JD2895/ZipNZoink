@@ -11,8 +11,8 @@ variables:
   IMAGE: unityci/editor # https://hub.docker.com/r/unityci/editor
   IMAGE_VERSION: "0.7" # https://github.com/Unity-CI/docker/releases
   UNITY_DIR: $CI_PROJECT_DIR # this needs to be an absolute path. Defaults to the root of your tree.
-  ITCH_USER: JD2895
-  ITCH_PROJECT: https://jd2895.itch.io/zip-n-zoink
+  ITCH_USER: jd2895
+  ITCH_PROJECT: zip-n-zoink
 
 image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
 
@@ -87,10 +87,10 @@ test-editmode:
   tags:
     - gitlab-org
 
-build-StandaloneLinux64:
-  <<: *build
-  variables:
-    BUILD_TARGET: StandaloneLinux64
+#build-StandaloneLinux64:
+#  <<: *build
+#  variables:
+#    BUILD_TARGET: StandaloneLinux64
 
 # linux il2cpp currently unsupported, see https://gitlab.com/gableroux/unity3d-gitlab-ci-example/-/issues/139
 #build-StandaloneLinux64-il2cpp:
@@ -181,7 +181,7 @@ itch:
   script:
     - VERSION=$CI_COMMIT_SHORT_SHA
 #    - butler push "./Builds/WebGL/${BUILD_NAME}" "${ITCH_USER}/${ITCH_PROJECT}:web" --userversion $VERSION
-    - butler push "./Builds/StandaloneLinux64" "${ITCH_USER}/${ITCH_PROJECT}:linux" --userversion $VERSION
+#    - butler push "./Builds/StandaloneLinux64" "${ITCH_USER}/${ITCH_PROJECT}:linux" --userversion $VERSION
     - butler push "./Builds/StandaloneWindows64" "${ITCH_USER}/${ITCH_PROJECT}:windows" --userversion $VERSION
     - butler push "./Builds/StandaloneOSX" "${ITCH_USER}/${ITCH_PROJECT}:mac" --userversion $VERSION
   only:
