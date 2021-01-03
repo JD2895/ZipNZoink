@@ -30,6 +30,8 @@ image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
   rules:
     - if: '$UNITY_LICENSE != null'
       when: always
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: never
 
 # run this job when you need to request a license
 # you may need to follow activation steps from documentation
