@@ -11,6 +11,8 @@ variables:
   IMAGE: unityci/editor # https://hub.docker.com/r/unityci/editor
   IMAGE_VERSION: "0.7" # https://github.com/Unity-CI/docker/releases
   UNITY_DIR: $CI_PROJECT_DIR # this needs to be an absolute path. Defaults to the root of your tree.
+  ITCH_USER: j.davis.2895@gmail.com
+  ITCH_PROJECT: Zip-N-Zoink
 
 image: $IMAGE:$UNITY_VERSION-base-$IMAGE_VERSION
 
@@ -125,13 +127,13 @@ build-StandaloneWindows64:
 #  variables:
 #    BUILD_TARGET: WebGL
 
-build-android:
-  <<: *build
-  image: $IMAGE:$UNITY_VERSION-android-$IMAGE_VERSION
-  variables:
-    BUILD_TARGET: Android
-    BUNDLE_VERSION_CODE: $CI_PIPELINE_IID
-    BUILD_APP_BUNDLE: "false"
+#build-android:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-android-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: Android
+#    BUNDLE_VERSION_CODE: $CI_PIPELINE_IID
+#    BUILD_APP_BUNDLE: "false"
 
 #deploy-android:
 #  stage: deploy
@@ -144,11 +146,11 @@ build-android:
 #    - fastlane supply --aab $BUILD_NAME.aab --track internal --package_name com.youcompany.yourgame --json_key ./gpc_token.json
 #  needs: ["build-android"]
 
-build-ios-xcode:
-  <<: *build
-  image: $IMAGE:$UNITY_VERSION-ios-$IMAGE_VERSION
-  variables:
-    BUILD_TARGET: iOS
+#build-ios-xcode:
+#  <<: *build
+#  image: $IMAGE:$UNITY_VERSION-ios-$IMAGE_VERSION
+#  variables:
+#    BUILD_TARGET: iOS
 
 #build-and-deploy-ios:
 #  stage: deploy
@@ -172,3 +174,15 @@ build-ios-xcode:
 #      - public
 #  only:
 #    - master
+
+itch:
+  image: dosowisko/butler
+  stage: deploy
+  script:
+    - VERSION=$CI_COMMIT_SHORT_SHA
+#    - butler push "./Builds/WebGL/${BUILD_NAME}" "${ITCH_USER}/${ITCH_PROJECT}:web" --userversion $VERSION
+    - butler push "./Builds/StandaloneLinux64" "${ITCH_USER}/${ITCH_PROJECT}:linux" --userversion $VERSION
+    - butler push "./Builds/StandaloneWindows64" "${ITCH_USER}/${ITCH_PROJECT}:windows" --userversion $VERSION
+    - butler push "./Builds/StandaloneOSX" "${ITCH_USER}/${ITCH_PROJECT}:mac" --userversion $VERSION
+  only:
+    - master
