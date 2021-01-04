@@ -74,5 +74,19 @@ public class DebugUIHelper : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void LoadLevel(string levelName)
+    {
+        SceneManager.LoadScene(levelName);
+    }
+
+    public void Quit()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+    }
+
     #endregion
 }
