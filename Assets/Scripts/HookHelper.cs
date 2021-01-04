@@ -8,6 +8,7 @@ using UnityEngine.Events;
 public class HookHelper : MonoBehaviour
 {
     public static event Action<HookSide> OnHookHitGround;
+    public static event Action<HookSide> OnHookHitHazard;
 
     public float firingSpeed;
     public HookSide hookSide;
@@ -46,6 +47,7 @@ public class HookHelper : MonoBehaviour
     private void OnDisable()
     {
         hookAttached = false;
+        firing = false;
         //collisionObj = null;
         rb.freezeRotation = false;
     }
@@ -89,7 +91,7 @@ public class HookHelper : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Ground") && !hookAttached)
         {
-            Debug.Log("Hook Hit Ground");
+            //Debug.Log("Hook Hit Ground");
             hitGround = true;
             firing = false;
             hookAttached = true;
@@ -104,6 +106,14 @@ public class HookHelper : MonoBehaviour
 
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
+        }
+        else if (collision.gameObject.layer == LayerMask.NameToLayer("Hazard") && !hookAttached)
+        {
+            //Debug.Log("Hook Hit Hazard");
+            hitGround = false;
+            firing = false;
+            hookAttached = false;
+            OnHookHitHazard?.Invoke(hookSide);
         }
     }
 

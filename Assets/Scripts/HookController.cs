@@ -66,6 +66,7 @@ public class HookController : MonoBehaviour
         h_Line = h_LineContainer.AddComponent<LineRenderer>();
         h_Line.widthMultiplier = 0.1f;
         h_Line.positionCount = 2;
+        h_Line.sortingOrder = -2;
         // Joint setup
         h_Joint = newHookCommonData.controllerParent.AddComponent<DistanceJoint2D>();   // Attach one end of the joint to the player.
         h_Joint.enabled = false;    // Disabled at start by default.

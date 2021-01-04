@@ -106,6 +106,9 @@ MonoBehaviour:
   hangTimer: 0
   curHorSpeed: 0
   watchthis: {x: 0, y: 0}
+  playerSprites:
+  - {fileID: -3104438503385684455, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
+  - {fileID: -7825059060802149688, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
 --- !u!61 &8958772189174495754
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -360,8 +363,9 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
-  m_Sprite: {fileID: 21300000, guid: a5a424993847250479a2bf7827db1b83, type: 3}
+  m_SortingOrder: -1
+  m_Sprite: {fileID: -3104438503385684455, guid: 188f3394c7da0fb44bed199b1baf25ab,
+    type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

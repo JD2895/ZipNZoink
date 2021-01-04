@@ -79,8 +79,6 @@ public class PlayerMovement_v3 : MonoBehaviour
     private float rbDefaultGravityScale;
     //TODO: Need to investigate how this works with air movement
 
-
-
     [Header("Input Containers")]
     private float curHorInput = 0;
     private bool fireRightHook = false;
@@ -93,9 +91,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool dashDown = false;
     private bool spinFlip = false;
 
-    /*** VISUAL DATA ***/
+    [Header("Visual Data")] // This should eventually just be handles by an animator
+    public Sprite[] playerSprites;
     private SpriteRenderer playerSprite;
-
     
     #endregion
 
@@ -104,11 +102,13 @@ public class PlayerMovement_v3 : MonoBehaviour
     private void OnEnable()
     {
         HookHelper.OnHookHitGround += HookHitGround;
+        HookHelper.OnHookHitHazard += HookHitHazard;
     }
 
     private void OnDisable()
     {
         HookHelper.OnHookHitGround -= HookHitGround;
+        HookHelper.OnHookHitHazard -= HookHitHazard;
     }
 
     private void Awake()
@@ -139,12 +139,12 @@ public class PlayerMovement_v3 : MonoBehaviour
         if (curHorInput > 0)
         {
             directionFacing = HoriDirection.Right;
-            playerSprite.flipX = false;
+            playerSprite.sprite = playerSprites[0];
         }
         else if (curHorInput < 0)
         {
             directionFacing = HoriDirection.Left;
-            playerSprite.flipX = true;
+            playerSprite.sprite = playerSprites[1];
         }
 
         hookSwingToApply = 0;
@@ -305,7 +305,6 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private void ControlHooks()
     {
-        
         //TODO: Stephen: I think we should check the hook state using public bools from Hook Controller, rather than a local variable that gets toggled
         hookR_connected = hookR_controller.h_onGround;
         hookL_connected = hookL_controller.h_onGround;
@@ -608,6 +607,19 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             hookL_controller.ChangeHookConnectedState(true);
             hookL_connected = true;
+        }
+    }
+
+    private void HookHitHazard(HookSide hookSide)
+    {
+
+        if (hookSide == HookSide.Right)
+        {
+            hookR_controller.DisconnectHook();
+        }
+        else if (hookSide == HookSide.Left)
+        {
+            hookL_controller.DisconnectHook();
         }
     }
 
