@@ -91,8 +91,10 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool dashDown = false;
     private bool spinFlip = false;
 
-    [Header("Visual Data")] // This should eventually just be handles by an animator
+    [Header("Visual Data")] // Most of this should eventually just be handles by an animator
     public Sprite[] playerSprites;
+    public GameObject lineRenderContainerR;
+    public GameObject lineRenderContainerL;
     private SpriteRenderer playerSprite;
     
     #endregion
@@ -116,8 +118,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         if (DetachHook == null) DetachHook = new UnityEvent();
 
         hookR_controller = this.gameObject.AddComponent<HookController>();
+        hookR_controller.SetLineContainer(lineRenderContainerR);
         hookR_controller.SetupHook(hookR_Object, commonHookData);
+
         hookL_controller = this.gameObject.AddComponent<HookController>();
+        hookL_controller.SetLineContainer(lineRenderContainerL);
         hookL_controller.SetupHook(hookL_Object, commonHookData);
 
         rb = GetComponent<Rigidbody2D>();

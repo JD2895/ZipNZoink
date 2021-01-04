@@ -16,7 +16,7 @@ public class HookController : MonoBehaviour
     private float reelPerSec;           // The amount of 'reeling' to apply per second if reeling is happening. reelPerSec = maxReelSpeed / timeToMaxReelSpeed.
     private float reelToApply;          // Is used to keep track of how much the joint is going to be reducing in size.
     // Line drawing
-    private GameObject h_LineContainer; // The gameobject that contains the line renderer for this hook
+    private GameObject h_LineContainer = null; // The gameobject that contains the line renderer for this hook
     private LineRenderer h_Line;        // The line renderer componenet for this hook
     // Hook helpers
     public bool h_out = false;         // Keeps track of if the hook is 'out' of the player
@@ -61,9 +61,16 @@ public class HookController : MonoBehaviour
         timeToMaxReelSpeed = newHookCommonData.timeToMaxReelSpeed;
         minJointDistance = newHookCommonData.minJointDistance;
         // Line (drawing) setup
-        h_LineContainer = new GameObject("HookLine");
-        h_LineContainer.transform.parent = newHookCommonData.controllerParent.transform;
-        h_Line = h_LineContainer.AddComponent<LineRenderer>();
+        if (h_LineContainer == null)
+        {
+            h_LineContainer = new GameObject("HookLine");
+            h_LineContainer.transform.parent = newHookCommonData.controllerParent.transform;
+            h_Line = h_LineContainer.AddComponent<LineRenderer>();
+        }
+        else
+        {
+            h_Line = h_LineContainer.GetComponent<LineRenderer>();
+        }
         h_Line.widthMultiplier = 0.1f;
         h_Line.positionCount = 2;
         h_Line.sortingOrder = -2;
@@ -148,6 +155,11 @@ public class HookController : MonoBehaviour
     {
         h_Line.SetPosition(0, this.transform.position);
         h_Line.SetPosition(1, h_Object.transform.position);
+    }
+
+    public void SetLineContainer(GameObject lineContainer)
+    {
+        h_LineContainer = lineContainer;
     }
 }
 
