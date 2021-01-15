@@ -14,6 +14,10 @@ public class HookHelper : MonoBehaviour
     public HookSide hookSide;
     public Rigidbody2D rb;
 
+    private float fixedSpeed;
+    public float timeToTravel;
+    public LayerMask latchable;
+
     private bool hitGround = false;
     private bool firing = false;
     private Vector2 nextPosition;
@@ -57,7 +61,8 @@ public class HookHelper : MonoBehaviour
         if (firing && !hitGround)
         {
             nextPosition = this.transform.position;
-            nextPosition += firingDirection * firingSpeed * Time.fixedDeltaTime;
+            //nextPosition += firingDirection * firingSpeed * Time.fixedDeltaTime;
+            nextPosition += firingDirection * fixedSpeed * Time.fixedDeltaTime;
             rb.MovePosition(nextPosition);
         }
     }
@@ -71,6 +76,13 @@ public class HookHelper : MonoBehaviour
         this.transform.eulerAngles = new Vector3(0f, 0f, Vector2.SignedAngle(Vector2.up, firingDirection));
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.freezeRotation = true;
+
+        RaycastHit2D rayHit = Physics2D.Raycast(startingPosition, firingDirection, 999f, latchable);
+        if (rayHit.collider != null)
+        {
+            float distance = Vector3.Distance(rayHit.point, transform.position);
+            fixedSpeed = distance / (timeToTravel);
+        }
     }
 
     //Called while the Hook is touching a Ground collider
@@ -95,15 +107,11 @@ public class HookHelper : MonoBehaviour
             hitGround = true;
             firing = false;
             hookAttached = true;
-
-            collisionObj = collision.gameObject;
-            targetLastPos = collision.transform.position;
-            hookOffset = transform.position - targetLastPos;
-
-            transform.position = targetLastPos + hookOffset;
+            //collisionObj = collision.gameObject;
+            //targetLastPos = collision.transform.position;
+            //hookOffset = transform.position - targetLastPos;
 
             this.transform.SetParent(collision.transform);
-
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
             OnHookHitGround?.Invoke(hookSide);
         }
