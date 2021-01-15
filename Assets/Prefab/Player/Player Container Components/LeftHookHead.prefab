@@ -72,13 +72,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba8aa03491a0f7248a31239bddca2d8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firingSpeed: 50
+  firingSpeed: 25
   hookSide: 1
   rb: {fileID: 3626901316701642481}
-  timeToTravel: 0.1
-  latchable:
-    serializedVersion: 2
-    m_Bits: 256
 --- !u!50 &3626901316701642481
 Rigidbody2D:
   serializedVersion: 4
