@@ -13,6 +13,7 @@ public class DebugUIHelper : MonoBehaviour
     public Toggle hookJumpToggle;
     public Toggle debugTextToggle;
     public Button restartButton;
+    public List<string> listOfLevels;
 
     void Start()
     {
@@ -72,6 +73,24 @@ public class DebugUIHelper : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void NextLevel()
+    {
+        Time.timeScale = 1f;
+        int nextIndex = listOfLevels.IndexOf(SceneManager.GetActiveScene().name) + 1;
+        if (nextIndex >= listOfLevels.Count - 1)
+            nextIndex = listOfLevels.Count - 1;
+        SceneManager.LoadScene(listOfLevels[nextIndex]);
+    }
+
+    public void PrevLevel()
+    {
+        Time.timeScale = 1f;
+        int prevIndex = listOfLevels.IndexOf(SceneManager.GetActiveScene().name) - 1;
+        if (prevIndex <= 0)
+            prevIndex = 0;
+        SceneManager.LoadScene(listOfLevels[prevIndex]);
     }
 
     #endregion
