@@ -23,6 +23,7 @@ public class HookHelper : MonoBehaviour
     private Vector2 nextPosition;
     private Vector2 firingDirection = new Vector2();
     private Transform origParent;
+    private float maxCastDistance = 99f;
 
     #region Platform Interaction Variables
 
@@ -77,11 +78,15 @@ public class HookHelper : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.freezeRotation = true;
 
-        RaycastHit2D rayHit = Physics2D.Raycast(startingPosition, firingDirection, 999f, latchable);
+        RaycastHit2D rayHit = Physics2D.Raycast(startingPosition, firingDirection, maxCastDistance, latchable);
         if (rayHit.collider != null)
         {
             float distance = Vector3.Distance(rayHit.point, transform.position);
             fixedSpeed = distance / (timeToTravel);
+        }
+        else
+        {
+            fixedSpeed = (maxCastDistance / 10) / timeToTravel;
         }
     }
 

@@ -93,5 +93,11 @@ public class DebugUIHelper : MonoBehaviour
         SceneManager.LoadScene(listOfLevels[prevIndex]);
     }
 
+    public void MainMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
+    }
+
     #endregion
 }

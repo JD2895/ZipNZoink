@@ -21,7 +21,7 @@ public class PathDefiner : MonoBehaviour
         foreach (Transform child in positionListObject.transform)
         {
             positionList.Add(child);
-            child.gameObject.SetActive(false);
+            //child.gameObject.SetActive(false);
         }
 
         if (positionList.Count < 2)
