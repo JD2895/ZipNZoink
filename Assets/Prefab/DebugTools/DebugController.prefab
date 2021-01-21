@@ -47,6 +47,6 @@ MonoBehaviour:
     type: 3}
   eventSystemPrefab: {fileID: 8871373993344100142, guid: cb747d2a548d5b547b956cf1b3722373,
     type: 3}
-  _hookFireVar: 0
+  _hookFireVar: 3
   _hookJump: 1
   _debugText: 0

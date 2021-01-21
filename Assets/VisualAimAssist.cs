@@ -67,10 +67,25 @@ public class VisualAimAssist : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        rightLine.SetPosition(0, this.transform.position);
-        rightLine.SetPosition(1, this.transform.position + (new Vector3(1f, 1f, 0f) * fadeDistance));
+        if (DebugOptions.hookFireVarient == HookFireVariant.OneHook)// && PlayerMovement_v3.SnapOctDirection(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) != Vector2.zero)
+        {
+            rightLine.enabled = false;
+            Vector2 aimingDirection = PlayerMovement_v3.SnapOctDirection(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            if (aimingDirection != Vector2.zero)
+            {
+                rightLine.enabled = true;
+                rightLine.SetPosition(0, this.transform.position);
+                rightLine.SetPosition(1, this.transform.position + ((Vector3)aimingDirection * fadeDistance));
+            }
+        }
+        else
+        {
+            rightLine.enabled = true;
+            rightLine.SetPosition(0, this.transform.position);
+            rightLine.SetPosition(1, this.transform.position + (new Vector3(1f, 1f, 0f) * fadeDistance));
 
-        leftLine.SetPosition(0, this.transform.position);
-        leftLine.SetPosition(1, this.transform.position + (new Vector3(-1f, 1f, 0f) * fadeDistance));
+            leftLine.SetPosition(0, this.transform.position);
+            leftLine.SetPosition(1, this.transform.position + (new Vector3(-1f, 1f, 0f) * fadeDistance));
+        }
     }
 }

@@ -24,7 +24,7 @@ public class HookController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(h_onGround)
+        if (h_onGround)
         {
             // Reduce joint length by reel amount
             float newJointDistance = h_Joint.distance - reelToApply * Time.fixedDeltaTime;
@@ -53,7 +53,7 @@ public class HookController : MonoBehaviour
     }
 
     public void SetupHook(GameObject newHookObject, HookControllerCommonSetup newHookCommonData)
-    {       
+    {
         // Variables
         h_Object = newHookObject;
         inputReelMinimum = newHookCommonData.inputReelMinimum;
@@ -90,7 +90,7 @@ public class HookController : MonoBehaviour
     public void FireHook(Vector2 firingDirection)
     {
         // Disconnect and fire are two button presses (also works for 'holding' the hook)
-        if (DebugOptions.hookFireVarient == HookFireVariant.TwoPress || DebugOptions.hookFireVarient == HookFireVariant.Hold)
+        if (DebugOptions.hookFireVarient == HookFireVariant.TwoPress || DebugOptions.hookFireVarient == HookFireVariant.Hold || DebugOptions.hookFireVarient == HookFireVariant.OneHook)
         {
             if (!h_out)
             {   // If the hook isn't out yet, activate the hook and fire it

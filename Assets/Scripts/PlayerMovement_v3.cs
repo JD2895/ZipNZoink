@@ -77,10 +77,12 @@ public class PlayerMovement_v3 : MonoBehaviour
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
     private float rbDefaultGravityScale;
+    private static float deadZoneValue = 0.1f;
     //TODO: Need to investigate how this works with air movement
 
     [Header("Input Containers")]
     private float curHorInput = 0;
+    private float curVerInput = 0;  // One Hook Variant
     private bool fireRightHook = false;
     private bool unhookRightHook = false;
     private float reelRightHook = 0;
@@ -273,7 +275,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     {
         // Check input
         curHorInput = Input.GetAxis("Horizontal");
-        if (Mathf.Abs(curHorInput) < 0.1) //deadzone check
+        curVerInput = Input.GetAxis("Vertical");    // One Hook Variant
+        if (Mathf.Abs(curHorInput) < deadZoneValue) //deadzone check
         {
             curHorInput = 0;
         }
@@ -315,7 +318,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         hookL_connected = hookL_controller.h_onGround;
         
         // Right hook control
-        if (fireRightHook)
+        if (fireRightHook && DebugOptions.hookFireVarient == HookFireVariant.OneHook)
+        {
+            hookR_controller.FireHook(SnapOctDirection(curHorInput, curVerInput));
+        }
+        else if (fireRightHook)
         {
             hookR_controller.FireHook(transform.up + transform.right);
         }
@@ -327,7 +334,11 @@ public class PlayerMovement_v3 : MonoBehaviour
         hookR_controller.ReelHook(reelRightHook);
 
         // Left hook control
-        if (fireLeftHook)
+        if (fireLeftHook && DebugOptions.hookFireVarient == HookFireVariant.OneHook)
+        {
+            hookR_controller.FireHook(SnapOctDirection(curHorInput, curVerInput));  // Intentionally only use the right hook
+        } 
+        else if (fireLeftHook)
         {
             hookL_controller.FireHook(transform.up + -transform.right);
         }
@@ -647,6 +658,20 @@ public class PlayerMovement_v3 : MonoBehaviour
     private bool IsHooked()
     {
         return (hookL_connected || hookR_connected);
+    }
+
+    public static Vector2 SnapOctDirection(float horVal, float verValue)
+    {
+        Vector2 snappedDirection = new Vector2();
+        if (horVal > deadZoneValue)
+            snappedDirection.x = 1f;
+        else if (horVal < -deadZoneValue)
+            snappedDirection.x = -1f;
+        if (verValue > deadZoneValue)
+            snappedDirection.y = 1f;
+        else if (verValue < -deadZoneValue)
+            snappedDirection.y = -1f;
+        return snappedDirection.normalized;
     }
 
     enum HookedState
