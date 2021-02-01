@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class VisualAimAssist : MonoBehaviour
 {
@@ -20,6 +21,44 @@ public class VisualAimAssist : MonoBehaviour
     private Gradient leftGradient;
     private GradientColorKey[] leftColorKey;
     public GradientAlphaKey[] sharedAlphaKey;
+
+    PlayerControls controls;
+    float horizontalInput;
+    float verticalInput;
+
+    private void Awake()
+    {
+        // New input system
+        controls = new PlayerControls();
+    }
+
+    private void OnEnable()
+    {
+        controls.OneHook.HoriztonalAxis.performed += HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed += HandleVerticalaxis;
+
+        controls.OneHook.HoriztonalAxis.Enable();
+        controls.OneHook.VerticalAxis.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.OneHook.HoriztonalAxis.performed -= HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed -= HandleVerticalaxis;
+
+        controls.OneHook.HoriztonalAxis.performed -= HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed -= HandleVerticalaxis;
+    }
+
+    private void HandleHorizontalAxis(InputAction.CallbackContext obj)
+    {
+        horizontalInput = obj.ReadValue<float>();
+    }
+
+    private void HandleVerticalaxis(InputAction.CallbackContext obj)
+    {
+        verticalInput = obj.ReadValue<float>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -70,7 +109,7 @@ public class VisualAimAssist : MonoBehaviour
         if (DebugOptions.hookFireVarient == HookFireVariant.OneHook)// && PlayerMovement_v3.SnapOctDirection(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) != Vector2.zero)
         {
             rightLine.enabled = false;
-            Vector2 aimingDirection = PlayerMovement_v3.SnapOctDirection(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            Vector2 aimingDirection = PlayerMovement_v3.SnapOctDirection(horizontalInput, verticalInput);
             if (aimingDirection != Vector2.zero)
             {
                 rightLine.enabled = true;

@@ -22,7 +22,7 @@ public class CameraMovementController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        curHorInput = Input.GetAxis("Horizontal");
+        //curHorInput = Input.GetAxis("Horizontal");
         if (curHorInput != 0)
         {
             camTarget.transform.position = new Vector3(actualTarget.transform.position.x, actualTarget.transform.position.y, this.transform.position.z);

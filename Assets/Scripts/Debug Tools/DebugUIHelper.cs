@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using System;
 
 public class DebugUIHelper : MonoBehaviour
 {
@@ -14,6 +15,43 @@ public class DebugUIHelper : MonoBehaviour
     public Toggle debugTextToggle;
     public Button restartButton;
     public List<string> listOfLevels;
+
+    PlayerControls controls;
+
+    private void Awake()
+    {
+        // New input system
+        controls = new PlayerControls();
+    }
+
+    private void OnEnable()
+    {
+        controls.UI.Menu.performed += HandleMenu;
+
+        controls.UI.Menu.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.UI.Menu.performed -= HandleMenu;
+
+        controls.UI.Menu.Disable();
+    }
+
+    private void HandleMenu(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        Debug.Log("here");
+        debugMenu.SetActive(!debugMenu.activeSelf);
+        Time.timeScale = debugMenu.activeSelf ? 0f : 1f;
+
+        // Highlight/Select when paused
+        if (debugMenu.activeSelf)
+        {
+            GameObject tempSel = EventSystem.current.currentSelectedGameObject;
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(tempSel);
+        }
+    }
 
     void Start()
     {
@@ -26,12 +64,14 @@ public class DebugUIHelper : MonoBehaviour
         hookJumpToggle.isOn = DebugUIController.instance.hookJump;
         debugTextToggle.isOn = DebugUIController.instance.debugText;
 
+
         debugMenu.SetActive(false);
     }
 
+    /*
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Debug Reset"))
+        if (InputManager.instance.MenuInput)
         {
             debugMenu.SetActive(!debugMenu.activeSelf);
             Time.timeScale = debugMenu.activeSelf ? 0f : 1f;
@@ -45,6 +85,7 @@ public class DebugUIHelper : MonoBehaviour
             }
         }
     }
+    */
 
     #region UI FUNCTIONS
 

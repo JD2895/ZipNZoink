@@ -268,9 +268,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8958772189174495765}
   - component: {fileID: 8958772189174495755}
-  - component: {fileID: 8958772189174495764}
   - component: {fileID: 8958772189174495754}
   - component: {fileID: 8958772189174495753}
+  - component: {fileID: 8743334924248542690}
   m_Layer: 0
   m_Name: Player v2
   m_TagString: Player
@@ -318,58 +318,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!114 &8958772189174495764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8958772189174495752}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0668226c71ebb147a12464273b60426, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hookR_Object: {fileID: 0}
-  hookL_Object: {fileID: 0}
-  commonHookData:
-    minJointDistance: 1
-    inputReelMinimum: 0.05
-    maxReelSpeed: 5
-    timeToMaxReelSpeed: 1
-    controllerParent: {fileID: 8958772189174495752}
-  bottomCollider: {fileID: 8958772189174495753}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  accelerateValueHorizontal: 30
-  decelerateValueHorizontal: 50
-  maxGroundSpeedViaInput: 7
-  movementCancelHelper: 4
-  jumpForce: 15.2
-  jumpCutoff: 4
-  jumpCancelGravityMult: 2
-  jumpBufferTime: 0.1
-  jumpBufferTimer: -1
-  airAccelerateValue: 10
-  airDecelerateValue: 10
-  maxHorizontalAirSpeed: 7
-  dashForceMult: 55
-  horHookMoveMult: 17
-  hookJumpForceMult: 10
-  hookJumpHorizMult: 0.7
-  superHookJumpForceMult: 26
-  wallSlideSpeed: 0
-  wallJumpOffSpeed: 8.5
-  hangTime: 0.2
-  hangTimer: 0
-  curHorSpeed: 0
-  watchthis: {x: 0, y: 0}
-  playerSprites:
-  - {fileID: -3104438503385684455, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
-  - {fileID: -7825059060802149688, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
-  lineRenderContainerR: {fileID: 1759288043896278382}
-  lineRenderContainerL: {fileID: 3501655602132890862}
 --- !u!61 &8958772189174495754
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -412,6 +360,56 @@ CircleCollider2D:
   m_Offset: {x: 0, y: -0.0698}
   serializedVersion: 2
   m_Radius: 0.43
+--- !u!114 &8743334924248542690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8958772189174495752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efd5c10b605605c47a8ab1a0e447f3fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hookR_Object: {fileID: 0}
+  commonHookData:
+    minJointDistance: 1
+    inputReelMinimum: 0.05
+    maxReelSpeed: 5
+    timeToMaxReelSpeed: 1
+    controllerParent: {fileID: 8958772189174495752}
+  bottomCollider: {fileID: 8958772189174495753}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  accelerateValueHorizontal: 30
+  decelerateValueHorizontal: 50
+  maxGroundSpeedViaInput: 7
+  movementCancelHelper: 4
+  jumpForce: 15.2
+  jumpCutoff: 4
+  jumpCancelGravityMult: 2
+  jumpBufferTime: 0.1
+  airAccelerateValue: 10
+  airDecelerateValue: 10
+  maxHorizontalAirSpeed: 7
+  dashForceMult: 55
+  horHookMoveMult: 17
+  hookJumpForceMult: 0.4
+  hookJumpHorizMult: 0.7
+  superHookJumpForceMult: 26
+  wallSlideSpeed: 0
+  wallJumpOffSpeed: 8.5
+  hangTime: 0.2
+  hangTimer: 0
+  curHorSpeed: 0
+  watchthis: {x: 0, y: 0}
+  playerSprites:
+  - {fileID: -3104438503385684455, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
+  - {fileID: -7825059060802149688, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
+  lineRenderContainerR: {fileID: 1759288043896278382}
+  lineRenderContainerL: {fileID: 3501655602132890862}
 --- !u!1 &8958772189708179093
 GameObject:
   m_ObjectHideFlags: 0

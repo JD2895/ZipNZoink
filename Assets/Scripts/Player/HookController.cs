@@ -83,7 +83,8 @@ public class HookController : MonoBehaviour
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
         // Other
-        PlayerMovement_v3.DetachHook.AddListener(DisconnectHook);
+        //PlayerMovement_v3.DetachHook.AddListener(DisconnectHook);
+        PlayerMovement_OneHook.DetachHook.AddListener(DisconnectHook);
         h_Object.SetActive(false);
     }
 
@@ -94,9 +95,12 @@ public class HookController : MonoBehaviour
         {
             if (!h_out)
             {   // If the hook isn't out yet, activate the hook and fire it
-                h_out = true;
-                h_Object.SetActive(true);
-                h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
+                if (firingDirection != Vector2.zero)
+                {
+                    h_out = true;
+                    h_Object.SetActive(true);
+                    h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
+                }
             }
             else if (h_out)
             {   // If the hook is already out

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-public class PlayerMovement_v3 : MonoBehaviour
+public class PlayerMovement_OneHook : MonoBehaviour
 {
     #region Variables
 
@@ -13,12 +13,9 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     [Header("Hook Setup")]
     public GameObject hookR_Object;     // The hook head for the right hook.
-    public GameObject hookL_Object;     // The hook head for the left hook.
     private HookController hookR_controller;
-    private HookController hookL_controller;
     public HookControllerCommonSetup commonHookData;    // Common data for hook setup
     private bool hookR_connected = false;
-    private bool hookL_connected = false;
 
     /*** MOVEMENT DATA ***/
     private Rigidbody2D rb;
@@ -38,7 +35,7 @@ public class PlayerMovement_v3 : MonoBehaviour
     //Jump buffer adds a buffer when the player presses the jump button, which can help if the press the button "too early" while in the air
     public float jumpBufferTime = 0.1f;
     //like above does not need to be public, currently is for testing
-    public float jumpBufferTimer;
+    private float jumpBufferTimer;
 
     [Header("Air Movement")]
     public float airAccelerateValue = 10;
@@ -84,12 +81,9 @@ public class PlayerMovement_v3 : MonoBehaviour
     [Header("Input Containers")]
     private float curHorInput = 0;
     private float curVerInput = 0;  // One Hook Variant
-    private bool fireRightHook = false;
+    //private bool fireRightHook = false;
     private bool unhookRightHook = false;
     private float reelRightHook = 0;
-    private bool unhookLeftHook = false;
-    private bool fireLeftHook = false;
-    private float reelLeftHook = 0;
     private bool jumpInput = false;
     private bool dashDown = false;
     private bool spinFlip = false;
@@ -110,15 +104,11 @@ public class PlayerMovement_v3 : MonoBehaviour
     private void Awake()
     {
         if (DetachHook == null) DetachHook = new UnityEvent();
-        /*
+
         hookR_controller = this.gameObject.AddComponent<HookController>();
         hookR_controller.SetLineContainer(lineRenderContainerR);
         hookR_controller.SetupHook(hookR_Object, commonHookData);
 
-        hookL_controller = this.gameObject.AddComponent<HookController>();
-        hookL_controller.SetLineContainer(lineRenderContainerL);
-        hookL_controller.SetupHook(hookL_Object, commonHookData);
-        */
         rb = GetComponent<Rigidbody2D>();
         rbDefaultGravityScale = rb.gravityScale;
 
@@ -126,6 +116,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         // New input system
         controls = new PlayerControls();
+
     }
 
     private void OnEnable()
@@ -133,36 +124,18 @@ public class PlayerMovement_v3 : MonoBehaviour
         HookHelper.OnHookHitGround += HookHitGround;
         HookHelper.OnHookHitHazard += HookHitHazard;
 
-        // New input system
         controls.OneHook.HoriztonalAxis.performed += HandleHorizontalAxis;
         controls.OneHook.VerticalAxis.performed += HandleVerticalaxis;
         controls.OneHook.Jump.performed += HandleJump;
+        controls.OneHook.Jump.canceled += HandleJump;
         controls.OneHook.Fire.performed += HandleFire;
         controls.OneHook.Reel.performed += HandleReel;
-    }
 
-    private void HandleHorizontalAxis(InputAction.CallbackContext obj)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void HandleVerticalaxis(InputAction.CallbackContext obj)
-    {
-        throw new NotImplementedException();
-    }
-    private void HandleReel(InputAction.CallbackContext obj)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void HandleFire(InputAction.CallbackContext obj)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void HandleJump(InputAction.CallbackContext obj)
-    {
-        throw new NotImplementedException();
+        controls.OneHook.HoriztonalAxis.Enable();
+        controls.OneHook.VerticalAxis.Enable();
+        controls.OneHook.Jump.Enable();
+        controls.OneHook.Fire.Enable();
+        controls.OneHook.Reel.Enable();
     }
 
     private void OnDisable()
@@ -170,8 +143,18 @@ public class PlayerMovement_v3 : MonoBehaviour
         HookHelper.OnHookHitGround -= HookHitGround;
         HookHelper.OnHookHitHazard -= HookHitHazard;
 
-        // New input system
+        controls.OneHook.HoriztonalAxis.performed -= HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed -= HandleVerticalaxis;
         controls.OneHook.Jump.performed -= HandleJump;
+        controls.OneHook.Jump.canceled -= HandleJump;
+        controls.OneHook.Fire.performed -= HandleFire;
+        controls.OneHook.Reel.performed -= HandleReel;
+
+        controls.OneHook.HoriztonalAxis.Disable();
+        controls.OneHook.VerticalAxis.Disable();
+        controls.OneHook.Jump.Disable();
+        controls.OneHook.Fire.Disable();
+        controls.OneHook.Reel.Disable();
     }
 
     private void Start()
@@ -180,10 +163,39 @@ public class PlayerMovement_v3 : MonoBehaviour
     }
     #endregion
 
+    #region Input Handlers
+    private void HandleHorizontalAxis(InputAction.CallbackContext obj)
+    {
+        curHorInput = obj.ReadValue<float>();
+        if (Mathf.Abs(curHorInput) < deadZoneValue) //deadzone check
+        {
+            curHorInput = 0;
+        }
+    }
+
+    private void HandleVerticalaxis(InputAction.CallbackContext obj)
+    {
+        curVerInput = obj.ReadValue<float>();
+    }
+
+    private void HandleReel(InputAction.CallbackContext obj)
+    {
+        reelRightHook = obj.ReadValue<float>();
+    }
+
+    private void HandleFire(InputAction.CallbackContext obj)
+    {
+        hookR_controller.FireHook(SnapOctDirection(curHorInput, curVerInput));
+    }
+
+    private void HandleJump(InputAction.CallbackContext obj)
+    {
+        jumpInput = obj.performed;
+    }
+    #endregion
+
     private void Update()
     {
-        CheckInput();
-
         if (curHorInput > 0)
         {
             directionFacing = HoriDirection.Right;
@@ -206,12 +218,12 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             hangTimer = hangTime;
 
-            if (jumpBufferTimer >= 0)
+            if (jumpBufferTimer > 0)
             {
                 jumpBufferTimer = 0;
                 jumpQueued = true;
             }
-            
+
             if (!spinFlipQueued)
             {
                 if (spinFlip)
@@ -246,7 +258,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
                 isWallSliding = false;
             }
-            else if(isWallSliding)
+            else if (isWallSliding)
             {
                 if (!wallJumpQueued)
                 {
@@ -256,7 +268,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             //In the air, unhooked
             else
             {
-                if (!Input.GetButton("Jump") && !isAirJumping)
+                if (!jumpInput && !isAirJumping)
                 {
                     if (rb.velocity.y > jumpCutoff)
                     {
@@ -298,7 +310,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         }
 
         // Jump buffering
-        if(jumpInput && !IsHooked())
+        if (jumpInput && !IsHooked())
         {
             //Debug.Log("Jump Buffering");
             jumpBufferTimer = jumpBufferTime;
@@ -312,33 +324,12 @@ public class PlayerMovement_v3 : MonoBehaviour
         watchthis = rb.velocity;
     }
 
-    private void CheckInput()
-    {
-        // Check input
-        curHorInput = Input.GetAxis("Horizontal");
-        curVerInput = Input.GetAxis("Vertical");    // One Hook Variant
-        if (Mathf.Abs(curHorInput) < deadZoneValue) //deadzone check
-        {
-            curHorInput = 0;
-        }
-        jumpInput = Input.GetButtonDown("Jump");
-        fireRightHook = Input.GetButtonDown("Right Hook Fire");
-        unhookRightHook = Input.GetButtonUp("Right Hook Fire");
-        reelRightHook = Input.GetAxis("Right Hook Reel");
-        fireLeftHook = Input.GetButtonDown("Left Hook Fire");
-        unhookLeftHook = Input.GetButtonUp("Left Hook Fire");
-        reelLeftHook = Input.GetAxis("Left Hook Reel");
-        dashDown = Input.GetButtonDown("Cancel");
-        spinFlip = Input.GetButtonDown("Fire3");
-    }
-
     private bool IsGrounded()
     {
         float extraHeight = 0.03f;
         Vector3 castOrigin = bottomCollider.bounds.center;
         Vector2 castSize = new Vector2(bottomCollider.radius * 2, bottomCollider.radius * 2);
         RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, Vector2.down, extraHeight, groundLayer);
-        //RaycastHit2D raycastHit = Physics2D.CircleCast(castOrigin, bottomCollider.radius, Vector2.down, extraHeight, groundLayer);
 
         //One Way Platform Conditional: Make sure the player is ABOVE the platform before IsGrounded() is true
         if (raycastHit.collider != null && raycastHit.collider.TryGetComponent(out PlatformEffector2D platEffector))
@@ -356,39 +347,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     {
         //TODO: Stephen: I think we should check the hook state using public bools from Hook Controller, rather than a local variable that gets toggled
         hookR_connected = hookR_controller.h_onGround;
-        hookL_connected = hookL_controller.h_onGround;
-        
-        // Right hook control
-        if (fireRightHook && DebugOptions.hookFireVarient == HookFireVariant.OneHook)
-        {
-            hookR_controller.FireHook(SnapOctDirection(curHorInput, curVerInput));
-        }
-        else if (fireRightHook)
-        {
-            hookR_controller.FireHook(transform.up + transform.right);
-        }
-        else if (unhookRightHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
-        {
-            isAirJumping = true;    //temp fix? to avoid accidental jump cancelling. might be fixed with state machine?
-            hookR_controller.DisconnectHook();
-        }
-        hookR_controller.ReelHook(reelRightHook);
 
-        // Left hook control
-        if (fireLeftHook && DebugOptions.hookFireVarient == HookFireVariant.OneHook)
-        {
-            hookR_controller.FireHook(SnapOctDirection(curHorInput, curVerInput));  // Intentionally only use the right hook
-        } 
-        else if (fireLeftHook)
-        {
-            hookL_controller.FireHook(transform.up + -transform.right);
-        }
-        else if (unhookLeftHook && DebugOptions.hookFireVarient == HookFireVariant.Hold)
-        {
-            isAirJumping = true;    //temp fix? to avoid accidental jump cancelling. might be fixed with state machine?
-            hookL_controller.DisconnectHook();
-        }
-        hookL_controller.ReelHook(reelLeftHook);
+        hookR_controller.ReelHook(reelRightHook);
     }
 
     private void FixedUpdate()
@@ -418,7 +378,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         if (dashQueued)
         {
-            Debug.Log("dashing");
+            //Debug.Log("dashing");
             dashQueued = false;
             Vector2 forceToApply = new Vector2(0, -1f * dashForceMult * Time.fixedDeltaTime);
             rb.velocity = new Vector2(0, 0);
@@ -443,14 +403,14 @@ public class PlayerMovement_v3 : MonoBehaviour
         else
         {
             //Get off the wall if the player presses away from it
-            if(curHorInput * wallSide < 0)
+            if (curHorInput * wallSide < 0)
             {
                 curHorSpeed = -wallSide * wallJumpOffSpeed;
                 isWallSliding = false;
                 rb.gravityScale = rbDefaultGravityScale;
 
             }
-        }    
+        }
     }
 
     #region FixedUpdate Movement Methods
@@ -575,7 +535,7 @@ public class PlayerMovement_v3 : MonoBehaviour
             directionWhenJumpStarted = directionFacing;
 
             ApplyJump(0, jumpForce);
-        } 
+        }
         // Hook Jump
         else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
@@ -588,8 +548,6 @@ public class PlayerMovement_v3 : MonoBehaviour
 
             rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
             ApplyJump(0, hookJumpForceMult);
-
-
         }
         // Super Jump
         else if (jumpQueued && EvaluateHookState() == (int)HookedState.Both)
@@ -633,7 +591,7 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             //newEuler = Mathf.Lerp(0f, 370f, fracComplete);
             newEuler = Mathf.Lerp(0f, 360f, (1.6f + (1f / (-fracComplete - 0.65f))));
-            newEuler *= -1f * (float) directionWhenJumpStarted;
+            newEuler *= -1f * (float)directionWhenJumpStarted;
             rb.MoveRotation(newEuler);
             yield return null;
             fracComplete = (Time.time - startTime) / timeToSpin;
@@ -645,25 +603,20 @@ public class PlayerMovement_v3 : MonoBehaviour
 
         rb.freezeRotation = true;
     }
-    
+
     #endregion
 
     #region Hook Methods and Enums
 
     private void HookHitGround(HookSide hookSide)
     {
-        // Cancel any jump cancelling that might have been happening
+        // Cancel any jump-cancel that might have been happening
         isAirJumping = false;
 
         if (hookSide == HookSide.Right)
         {
             hookR_controller.ChangeHookConnectedState(true);
             hookR_connected = true;
-        }
-        else if (hookSide == HookSide.Left)
-        {
-            hookL_controller.ChangeHookConnectedState(true);
-            hookL_connected = true;
         }
     }
 
@@ -674,23 +627,13 @@ public class PlayerMovement_v3 : MonoBehaviour
         {
             hookR_controller.DisconnectHook();
         }
-        else if (hookSide == HookSide.Left)
-        {
-            hookL_controller.DisconnectHook();
-        }
     }
 
-    private int EvaluateHookState()
+    public int EvaluateHookState()
     {
-        if ((hookL_controller.h_onGround && !hookR_controller.h_onGround)
-            || (!hookL_controller.h_onGround && hookR_controller.h_onGround))
+        if (hookR_controller.h_onGround)
         {
             return 1;
-        }
-
-        if (hookL_controller.h_onGround && hookR_controller.h_onGround)
-        {
-            return 2;
         }
 
         return 0;
@@ -698,7 +641,7 @@ public class PlayerMovement_v3 : MonoBehaviour
 
     private bool IsHooked()
     {
-        return (hookL_connected || hookR_connected);
+        return (hookR_connected);
     }
 
     public static Vector2 SnapOctDirection(float horVal, float verValue)
@@ -716,13 +659,12 @@ public class PlayerMovement_v3 : MonoBehaviour
     }
 
     enum HookedState
-    { 
+    {
         None = 0,
         One = 1,
         Both = 2
-    
     }
-    
+
     enum HoriDirection
     {
         Left = -1,

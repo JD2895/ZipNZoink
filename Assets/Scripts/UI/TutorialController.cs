@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class TutorialController : MonoBehaviour
 {
@@ -15,20 +16,100 @@ public class TutorialController : MonoBehaviour
     private int jumpTutorialSatus = 0;
     private int aimTutorialSatus = 0;
     private int fireTutorialSatus = 0;
+    private int unhookTutorialSatus = 0;
     private int reelTutorialSatus = 0;
+    private int hookJumpTutorialSatus = 0;
 
     public TextMeshProUGUI instructionText;
     public Transform animationPosition;
 
     private bool controllerVersion = true;
 
-    // Start is called before the first frame update
-    void Start()
+    public PlayerMovement_OneHook playermovementController;
+
+    PlayerControls controls;
+    float horizontalInput;
+    float verticalInput;
+
+    private void Awake()
     {
-        
+        // New input system
+        controls = new PlayerControls();
     }
 
-    // Update is called once per frame
+    private void OnEnable()
+    {
+        controls.OneHook.HoriztonalAxis.performed += HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed += HandleVerticalaxis;
+        controls.OneHook.Jump.performed += HandleJump;
+        controls.OneHook.Jump.canceled += HandleJump;
+        controls.OneHook.Fire.performed += HandleFire;
+        controls.OneHook.Reel.performed += HandleReel;
+
+        controls.OneHook.HoriztonalAxis.Enable();
+        controls.OneHook.VerticalAxis.Enable();
+        controls.OneHook.Jump.Enable();
+        controls.OneHook.Fire.Enable();
+        controls.OneHook.Reel.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.OneHook.HoriztonalAxis.performed -= HandleHorizontalAxis;
+        controls.OneHook.VerticalAxis.performed -= HandleVerticalaxis;
+        controls.OneHook.Jump.performed -= HandleJump;
+        controls.OneHook.Jump.canceled -= HandleJump;
+        controls.OneHook.Fire.performed -= HandleFire;
+        controls.OneHook.Reel.performed -= HandleReel;
+
+        controls.OneHook.HoriztonalAxis.Disable();
+        controls.OneHook.VerticalAxis.Disable();
+        controls.OneHook.Jump.Disable();
+        controls.OneHook.Fire.Disable();
+        controls.OneHook.Reel.Disable();
+    }
+
+    private void HandleHorizontalAxis(InputAction.CallbackContext obj)
+    {
+        horizontalInput = obj.ReadValue<float>();
+        if (moveTutorialSatus == 1 && Mathf.Abs(horizontalInput) > 0.5f)
+            moveTutorialSatus = 2;
+        if (aimTutorialSatus == 1 && obj.ReadValue<float>() > 0.5f)
+            aimTutorialSatus = 2;
+    }
+
+    private void HandleVerticalaxis(InputAction.CallbackContext obj)
+    {
+        verticalInput = obj.ReadValue<float>();
+        if (aimTutorialSatus == 2 && Mathf.Abs(verticalInput) > 0.5f)
+            aimTutorialSatus = 3;
+    }
+
+    private void HandleReel(InputAction.CallbackContext obj)
+    {
+        if (reelTutorialSatus == 1 && playermovementController.EvaluateHookState() == 1)
+            reelTutorialSatus = 2;
+    }
+
+    private void HandleFire(InputAction.CallbackContext obj)
+    {
+        if (Mathf.Abs(horizontalInput) > 0.2f || Mathf.Abs(verticalInput) > 0.2f)
+        {
+            if (fireTutorialSatus == 1)
+                fireTutorialSatus = 2;
+        }
+        if (unhookTutorialSatus == 1 && playermovementController.EvaluateHookState() == 1)
+            unhookTutorialSatus = 2;
+    }
+
+    private void HandleJump(InputAction.CallbackContext obj)
+    {
+        if (jumpTutorialSatus == 1)
+            jumpTutorialSatus = 2;
+        if (hookJumpTutorialSatus == 1 && playermovementController.EvaluateHookState() == 1)
+            hookJumpTutorialSatus = 2;
+    }
+
     void Update()
     {
         // 1
@@ -53,17 +134,37 @@ public class TutorialController : MonoBehaviour
         }
 
         // 4
-        if (aimTutorialSatus == 2 && fireTutorialSatus == 0)
+        if (aimTutorialSatus == 3 && fireTutorialSatus == 0)
         {
             fireTutorialSatus = 1;
             StartCoroutine(FireTutorial());
         }
 
         // 5
-        if (fireTutorialSatus == 2 && reelTutorialSatus == 0)
+        if (fireTutorialSatus == 2 && unhookTutorialSatus == 0)
+        {
+            unhookTutorialSatus = 1;
+            StartCoroutine(UnhookTutorial());
+        }
+
+        // 6
+        if (unhookTutorialSatus == 2 && reelTutorialSatus == 0)
         {
             reelTutorialSatus = 1;
             StartCoroutine(ReelTutorial());
+        }
+
+        // 7
+        if (reelTutorialSatus == 2 && hookJumpTutorialSatus == 0)
+        {
+            hookJumpTutorialSatus = 1;
+            StartCoroutine(HookJumpTutorial());
+        }
+
+        // DONE
+        if (hookJumpTutorialSatus == 2)
+        {
+            instructionText.text = "REACH THE EXIT";
         }
     }
 
@@ -80,12 +181,11 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(movementButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
-        while (Mathf.Abs(Input.GetAxis("Horizontal")) < 0.7f)
+        while (moveTutorialSatus == 1)
         {
             yield return null;
         }
 
-        moveTutorialSatus = 2;
         Destroy(animationObject);
     }
 
@@ -95,12 +195,11 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
-        while (!Input.GetButtonDown("Jump"))
+        while (jumpTutorialSatus == 1)
         {
             yield return null;
         }
 
-        jumpTutorialSatus = 2;
         Destroy(animationObject);
     }
 
@@ -110,16 +209,11 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(aimButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
-        bool bothPressed = false;
-
-        while (!bothPressed)
+        while (aimTutorialSatus < 3)
         {
-            if ((Mathf.Abs(Input.GetAxis("Horizontal")) > 0.4f) && (Mathf.Abs(Input.GetAxis("Vertical")) > 0.4f))
-                bothPressed = true;
             yield return null;
         }
 
-        aimTutorialSatus = 2;
         Destroy(animationObject);
     }
 
@@ -129,12 +223,25 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(fireButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
-        while (!Input.GetButtonDown("Right Hook Fire"))
+        while (fireTutorialSatus == 1)
         {
             yield return null;
         }
 
-        fireTutorialSatus = 2;
+        Destroy(animationObject);
+    }
+
+    private IEnumerator UnhookTutorial()
+    {
+        instructionText.text = "UNHOOK";
+        GameObject animationObject = Instantiate(fireButton.controllerVersion, animationPosition.parent);
+        animationObject.transform.position = animationPosition.position;
+
+        while (unhookTutorialSatus == 1)
+        {
+            yield return null;
+        }
+
         Destroy(animationObject);
     }
 
@@ -144,12 +251,25 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(reelButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
-        while (!Input.GetButtonDown("Right Hook Reel")) // Change to get axis?
+        while (reelTutorialSatus == 1)
         {
             yield return null;
         }
 
-        reelTutorialSatus = 2;
+        Destroy(animationObject);
+    }
+
+    private IEnumerator HookJumpTutorial()
+    {
+        instructionText.text = "HOOK JUMP";
+        GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
+        animationObject.transform.position = animationPosition.position;
+
+        while (hookJumpTutorialSatus == 1)
+        {
+            yield return null;
+        }
+
         Destroy(animationObject);
     }
 }
