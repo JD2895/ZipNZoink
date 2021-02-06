@@ -110,62 +110,9 @@ public class TutorialController : MonoBehaviour
             hookJumpTutorialSatus = 2;
     }
 
-    void Update()
+    private void Start()
     {
-        // 1
-        if (moveTutorialSatus == 0)
-        {
-            moveTutorialSatus = 1;
-            StartCoroutine(MoveTutorial());
-        }
-
-        // 2
-        if (moveTutorialSatus == 2 && jumpTutorialSatus == 0)
-        {
-            jumpTutorialSatus = 1;
-            StartCoroutine(JumpTutorial());
-        }
-
-        // 3
-        if (jumpTutorialSatus == 2 && aimTutorialSatus == 0)
-        {
-            aimTutorialSatus = 1;
-            StartCoroutine(AimTutorial());
-        }
-
-        // 4
-        if (aimTutorialSatus == 3 && fireTutorialSatus == 0)
-        {
-            fireTutorialSatus = 1;
-            StartCoroutine(FireTutorial());
-        }
-
-        // 5
-        if (fireTutorialSatus == 2 && unhookTutorialSatus == 0)
-        {
-            unhookTutorialSatus = 1;
-            StartCoroutine(UnhookTutorial());
-        }
-
-        // 6
-        if (unhookTutorialSatus == 2 && reelTutorialSatus == 0)
-        {
-            reelTutorialSatus = 1;
-            StartCoroutine(ReelTutorial());
-        }
-
-        // 7
-        if (reelTutorialSatus == 2 && hookJumpTutorialSatus == 0)
-        {
-            hookJumpTutorialSatus = 1;
-            StartCoroutine(HookJumpTutorial());
-        }
-
-        // DONE
-        if (hookJumpTutorialSatus == 2)
-        {
-            instructionText.text = "REACH THE EXIT";
-        }
+        StartCoroutine(StartTutorial());
     }
 
     [System.Serializable]
@@ -173,6 +120,30 @@ public class TutorialController : MonoBehaviour
     {
         public GameObject controllerVersion;
         public GameObject keyboardVersion;
+    }
+
+    private IEnumerator StartTutorial()
+    {
+        moveTutorialSatus = 1;
+        yield return StartCoroutine(MoveTutorial());
+
+        jumpTutorialSatus = 1;
+        yield return StartCoroutine(JumpTutorial());
+
+        aimTutorialSatus = 1;
+        yield return StartCoroutine(AimTutorial());
+
+        fireTutorialSatus = 1;
+        yield return StartCoroutine(FireTutorial());
+
+        unhookTutorialSatus = 1;
+        yield return StartCoroutine(UnhookTutorial());
+
+        reelTutorialSatus = 1;
+        yield return StartCoroutine(ReelTutorial());
+
+        hookJumpTutorialSatus = 1;
+        yield return StartCoroutine(HookJumpTutorial());
     }
 
     private IEnumerator MoveTutorial()
