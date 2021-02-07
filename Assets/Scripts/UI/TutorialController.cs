@@ -20,10 +20,6 @@ public class TutorialController : MonoBehaviour
     private int reelTutorialSatus = 0;
     private int hookJumpTutorialSatus = 0;
 
-    public AnimationCurve fadeCurve;
-    private float t = 0;
-    private bool fading = false;
-
     public TextMeshProUGUI instructionText;
     public Transform animationPosition;
 
@@ -114,64 +110,9 @@ public class TutorialController : MonoBehaviour
             hookJumpTutorialSatus = 2;
     }
 
-    void Update()
+    private void Start()
     {
-        // 1
-        if (moveTutorialSatus == 0)
-        {
-            moveTutorialSatus = 1;
-            StartCoroutine(MoveTutorial());
-        }
-
-        // 2
-        /*
-        if (moveTutorialSatus == 2 && jumpTutorialSatus == 0)
-        {
-            jumpTutorialSatus = 1;
-            StartCoroutine(JumpTutorial());
-        }
-        */
-
-        // 3
-        if (jumpTutorialSatus == 2 && aimTutorialSatus == 0)
-        {
-            aimTutorialSatus = 1;
-            StartCoroutine(AimTutorial());
-        }
-
-        // 4
-        if (aimTutorialSatus == 3 && fireTutorialSatus == 0)
-        {
-            fireTutorialSatus = 1;
-            StartCoroutine(FireTutorial());
-        }
-
-        // 5
-        if (fireTutorialSatus == 2 && unhookTutorialSatus == 0)
-        {
-            unhookTutorialSatus = 1;
-            StartCoroutine(UnhookTutorial());
-        }
-
-        // 6
-        if (unhookTutorialSatus == 2 && reelTutorialSatus == 0)
-        {
-            reelTutorialSatus = 1;
-            StartCoroutine(ReelTutorial());
-        }
-
-        // 7
-        if (reelTutorialSatus == 2 && hookJumpTutorialSatus == 0)
-        {
-            hookJumpTutorialSatus = 1;
-            StartCoroutine(HookJumpTutorial());
-        }
-
-        // DONE
-        if (hookJumpTutorialSatus == 2)
-        {
-            instructionText.text = "REACH THE EXIT";
-        }
+        StartCoroutine(StartTutorial());
     }
 
     [System.Serializable]
@@ -179,6 +120,30 @@ public class TutorialController : MonoBehaviour
     {
         public GameObject controllerVersion;
         public GameObject keyboardVersion;
+    }
+
+    private IEnumerator StartTutorial()
+    {
+        moveTutorialSatus = 1;
+        yield return StartCoroutine(MoveTutorial());
+
+        jumpTutorialSatus = 1;
+        yield return StartCoroutine(JumpTutorial());
+
+        aimTutorialSatus = 1;
+        yield return StartCoroutine(AimTutorial());
+
+        fireTutorialSatus = 1;
+        yield return StartCoroutine(FireTutorial());
+
+        unhookTutorialSatus = 1;
+        yield return StartCoroutine(UnhookTutorial());
+
+        reelTutorialSatus = 1;
+        yield return StartCoroutine(ReelTutorial());
+
+        hookJumpTutorialSatus = 1;
+        yield return StartCoroutine(HookJumpTutorial());
     }
 
     private IEnumerator MoveTutorial()
@@ -192,9 +157,7 @@ public class TutorialController : MonoBehaviour
             yield return null;
         }
 
-        yield return StartCoroutine(FadeOut(animationObject, instructionText));
-        Destroy(animationObject); 
-        yield return StartCoroutine(JumpTutorial());
+        Destroy(animationObject);
     }
 
     private IEnumerator JumpTutorial()
@@ -202,8 +165,6 @@ public class TutorialController : MonoBehaviour
         instructionText.text = "JUMP";
         GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
-
-        yield return StartCoroutine(FadeIn(animationObject, instructionText));
 
         while (jumpTutorialSatus == 1)
         {
@@ -281,49 +242,5 @@ public class TutorialController : MonoBehaviour
         }
 
         Destroy(animationObject);
-    }
-
-    private IEnumerator FadeOut(GameObject animation, TextMeshProUGUI text)
-    {
-        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
-        Color spriteColor = renderer.color;
-
-        Color textColor = text.color;
-        t = 0;
-        while (t < 1)
-        {
-            spriteColor.a = 1f - fadeCurve.Evaluate(t);
-            textColor.a = 1f - fadeCurve.Evaluate(t);
-            
-            renderer.color = spriteColor;
-            text.color = textColor;
-            
-            t += 1f * Time.deltaTime;
-            yield return null;
-        }
-
-        fading = false;
-    }
-
-    private IEnumerator FadeIn(GameObject animation, TextMeshProUGUI text)
-    {
-        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
-        Color spriteColor = renderer.color;
-
-        Color textColor = text.color;
-        t = 0;
-        while (t < 1)
-        {
-            spriteColor.a = 1f - fadeCurve.Evaluate(t);
-            textColor.a = 1f - fadeCurve.Evaluate(t);
-            
-            renderer.color = spriteColor;
-            text.color = textColor;
-            
-            t -= 1f * Time.deltaTime;
-            yield return null;
-        }
-
-        fading = false;
     }
 }
