@@ -20,6 +20,10 @@ public class TutorialController : MonoBehaviour
     private int reelTutorialSatus = 0;
     private int hookJumpTutorialSatus = 0;
 
+    public AnimationCurve fadeCurve;
+    private float t = 0;
+    private bool fading = false;
+
     public TextMeshProUGUI instructionText;
     public Transform animationPosition;
 
@@ -120,11 +124,13 @@ public class TutorialController : MonoBehaviour
         }
 
         // 2
+        /*
         if (moveTutorialSatus == 2 && jumpTutorialSatus == 0)
         {
             jumpTutorialSatus = 1;
             StartCoroutine(JumpTutorial());
         }
+        */
 
         // 3
         if (jumpTutorialSatus == 2 && aimTutorialSatus == 0)
@@ -186,7 +192,9 @@ public class TutorialController : MonoBehaviour
             yield return null;
         }
 
-        Destroy(animationObject);
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
+        Destroy(animationObject); 
+        yield return StartCoroutine(JumpTutorial());
     }
 
     private IEnumerator JumpTutorial()
@@ -194,6 +202,8 @@ public class TutorialController : MonoBehaviour
         instructionText.text = "JUMP";
         GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
+
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
 
         while (jumpTutorialSatus == 1)
         {
@@ -271,5 +281,49 @@ public class TutorialController : MonoBehaviour
         }
 
         Destroy(animationObject);
+    }
+
+    private IEnumerator FadeOut(GameObject animation, TextMeshProUGUI text)
+    {
+        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
+        Color spriteColor = renderer.color;
+
+        Color textColor = text.color;
+        t = 0;
+        while (t < 1)
+        {
+            spriteColor.a = 1f - fadeCurve.Evaluate(t);
+            textColor.a = 1f - fadeCurve.Evaluate(t);
+            
+            renderer.color = spriteColor;
+            text.color = textColor;
+            
+            t += 1f * Time.deltaTime;
+            yield return null;
+        }
+
+        fading = false;
+    }
+
+    private IEnumerator FadeIn(GameObject animation, TextMeshProUGUI text)
+    {
+        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
+        Color spriteColor = renderer.color;
+
+        Color textColor = text.color;
+        t = 0;
+        while (t < 1)
+        {
+            spriteColor.a = 1f - fadeCurve.Evaluate(t);
+            textColor.a = 1f - fadeCurve.Evaluate(t);
+            
+            renderer.color = spriteColor;
+            text.color = textColor;
+            
+            t -= 1f * Time.deltaTime;
+            yield return null;
+        }
+
+        fading = false;
     }
 }
