@@ -98,12 +98,13 @@ public class TutorialController : MonoBehaviour
 
     private void HandleFire(InputAction.CallbackContext obj)
     {
+        Debug.Log(playermovementController.EvaluateHookState());
         if (Mathf.Abs(horizontalInput) > 0.2f || Mathf.Abs(verticalInput) > 0.2f)
         {
             if (fireTutorialSatus == 1)
                 fireTutorialSatus = 2;
         }
-        if (unhookTutorialSatus == 1 && playermovementController.EvaluateHookState() == 1)
+        if (unhookTutorialSatus == 1)// && playermovementController.EvaluateHookState() == 1)
             unhookTutorialSatus = 2;
     }
 
