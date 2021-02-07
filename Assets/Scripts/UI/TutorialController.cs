@@ -23,13 +23,18 @@ public class TutorialController : MonoBehaviour
     public TextMeshProUGUI instructionText;
     public Transform animationPosition;
 
-    private bool controllerVersion = true;
+    public bool controllerVersion = true;
 
     public PlayerMovement_OneHook playermovementController;
 
     PlayerControls controls;
     float horizontalInput;
     float verticalInput;
+
+    public AnimationCurve fadeInCurve;
+    public float fadeInSpeedMult;
+    public AnimationCurve fadeOutCurve;
+    public float fadeOutSpeedMult;
 
     private void Awake()
     {
@@ -124,25 +129,18 @@ public class TutorialController : MonoBehaviour
 
     private IEnumerator StartTutorial()
     {
-        moveTutorialSatus = 1;
         yield return StartCoroutine(MoveTutorial());
 
-        jumpTutorialSatus = 1;
         yield return StartCoroutine(JumpTutorial());
 
-        aimTutorialSatus = 1;
         yield return StartCoroutine(AimTutorial());
 
-        fireTutorialSatus = 1;
         yield return StartCoroutine(FireTutorial());
 
-        unhookTutorialSatus = 1;
         yield return StartCoroutine(UnhookTutorial());
 
-        reelTutorialSatus = 1;
         yield return StartCoroutine(ReelTutorial());
 
-        hookJumpTutorialSatus = 1;
         yield return StartCoroutine(HookJumpTutorial());
     }
 
@@ -151,11 +149,14 @@ public class TutorialController : MonoBehaviour
         instructionText.text = "MOVE";
         GameObject animationObject = Instantiate(movementButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
+        moveTutorialSatus = 1;
 
         while (moveTutorialSatus == 1)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -166,10 +167,16 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        jumpTutorialSatus = 1;
+
         while (jumpTutorialSatus == 1)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -180,10 +187,16 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(aimButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        aimTutorialSatus = 1;
+
         while (aimTutorialSatus < 3)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -194,10 +207,16 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(fireButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        fireTutorialSatus = 1;
+
         while (fireTutorialSatus == 1)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -208,10 +227,16 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(fireButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        unhookTutorialSatus = 1;
+
         while (unhookTutorialSatus == 1)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -222,10 +247,16 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(reelButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        reelTutorialSatus = 1;
+
         while (reelTutorialSatus == 1)
         {
             yield return null;
         }
+
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
 
         Destroy(animationObject);
     }
@@ -236,11 +267,60 @@ public class TutorialController : MonoBehaviour
         GameObject animationObject = Instantiate(jumpButton.controllerVersion, animationPosition.parent);
         animationObject.transform.position = animationPosition.position;
 
+        yield return StartCoroutine(FadeIn(animationObject, instructionText));
+
+        hookJumpTutorialSatus = 1;
+
         while (hookJumpTutorialSatus == 1)
         {
             yield return null;
         }
 
+        yield return StartCoroutine(FadeOut(animationObject, instructionText));
+
         Destroy(animationObject);
     }
+
+    private IEnumerator FadeIn(GameObject animation, TextMeshProUGUI text)
+    {
+        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
+        Color spriteColor = renderer.color;
+
+        Color textColor = text.color;
+        float t = 0;
+
+        while (t < 1)
+        {
+            spriteColor.a = fadeInCurve.Evaluate(t);
+            textColor.a = fadeInCurve.Evaluate(t);
+
+            renderer.color = spriteColor;
+            text.color = textColor;
+
+            t += fadeInSpeedMult * Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private IEnumerator FadeOut(GameObject animation, TextMeshProUGUI text)
+    {
+        SpriteRenderer renderer = animation.GetComponent<SpriteRenderer>();
+        Color spriteColor = renderer.color;
+
+        Color textColor = text.color;
+        float t = 0;
+
+        while (t < 1)
+        {
+            spriteColor.a = fadeOutCurve.Evaluate(t);
+            textColor.a = fadeOutCurve.Evaluate(t);
+
+            renderer.color = spriteColor;
+            text.color = textColor;
+
+            t += fadeOutSpeedMult * Time.deltaTime;
+            yield return null;
+        }
+    }
+
 }

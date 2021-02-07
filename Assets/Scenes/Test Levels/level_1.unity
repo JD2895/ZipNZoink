@@ -8227,33 +8227,69 @@ MonoBehaviour:
       type: 3}
     keyboardVersion: {fileID: 6950369048703656928, guid: 35edbd8a5d4bfe742b41e52a275b70d9,
       type: 3}
-  fadeCurve:
+  instructionText: {fileID: 592344268}
+  animationPosition: {fileID: 1776754628}
+  controllerVersion: 0
+  playermovementController: {fileID: 1645876306}
+  fadeInCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
-      outSlope: 1
-      tangentMode: 34
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  instructionText: {fileID: 592344268}
-  animationPosition: {fileID: 1776754628}
-  playermovementController: {fileID: 1645876306}
+  fadeInSpeedMult: 5
+  fadeOutCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.8251134
+      value: 0.6226461
+      inSlope: -1.4853089
+      outSlope: -1.4853089
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.0000076293945
+      inSlope: -3.4878118
+      outSlope: -3.4878118
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.27580395
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  fadeOutSpeedMult: 0.9
 --- !u!1 &1028898222
 GameObject:
   m_ObjectHideFlags: 0
@@ -8968,12 +9004,12 @@ PrefabInstance:
     - target: {fileID: 5478579942629512536, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5478579942629512536, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5478579942629512536, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
@@ -9033,12 +9069,12 @@ PrefabInstance:
     - target: {fileID: 5478579943174638499, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5478579943174638499, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5478579943174638499, guid: b5a925a64ed042546a906e42987363ac,
         type: 3}
