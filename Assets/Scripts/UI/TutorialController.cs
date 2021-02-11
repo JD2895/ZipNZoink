@@ -98,7 +98,7 @@ public class TutorialController : MonoBehaviour
 
     private void HandleFire(InputAction.CallbackContext obj)
     {
-        Debug.Log(playermovementController.EvaluateHookState());
+        //Debug.Log(playermovementController.EvaluateHookState());
         if (Mathf.Abs(horizontalInput) > 0.2f || Mathf.Abs(verticalInput) > 0.2f)
         {
             if (fireTutorialSatus == 1)
