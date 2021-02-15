@@ -15,9 +15,15 @@ public class ProcGenTiler : MonoBehaviour
     public Texture2D groundSource = null;
     public Texture2D hazardSource = null;
 
-    public float mainChance = 60f;
-    public float uncommonChance = 25f;
-    public float rareChance = 15f;
+    public float chance_1 = 50f;
+    public float chance_2 = 9f;
+    public float chance_3 = 9f;
+    public float chance_4 = 9f;
+    public float chance_5 = 6f;
+    public float chance_6 = 6f;
+    public float chance_7 = 5f;
+    public float chance_8 = 3f;
+    public float chance_9 = 3f;
 
     private bool TL_base;   // Top  Left
     private bool TC_base;   // "    Center
@@ -27,6 +33,34 @@ public class ProcGenTiler : MonoBehaviour
     private bool BL_base;   // Bottom Left
     private bool BC_base;   // "    Center
     private bool BR_base;   // "    Right
+
+    private int tilesPerRow = 13;
+
+    private void Start()
+    {
+        //plannerTMap.SetTile(new Vector3Int(2, 2, 0), plannerHazardTile);
+        //plannerTMap.SetTile(new Vector3Int(0, 2, 0), plannerHazardTile);
+        //plannerTMap.SetTile(new Vector3Int(2, 0, 0), plannerHazardTile);
+        //plannerTMap.SetTile(new Vector3Int(0, 0, 0), plannerHazardTile);
+        //plannerTMap.ClearAllTiles();
+        
+        BoundsInt plannerBounds = plannerTMap.cellBounds;
+        TileBase[] plannerAllTiles = plannerTMap.GetTilesBlock(plannerBounds);
+
+        for (int x = 0; x < plannerBounds.size.x; x++)
+        {
+            for (int y = 0; y < plannerBounds.size.y; y++)
+            {
+                TileBase plannerTile = plannerAllTiles[x + y * plannerBounds.size.x];
+
+                if (plannerTile == null || plannerTile != plannerGroundTile)
+                    continue;
+
+                plannerTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), plannerHazardTile);
+            }
+        }
+                //GenerateTiles();
+    }
 
     public void GenerateTiles()
     {
@@ -39,10 +73,36 @@ public class ProcGenTiler : MonoBehaviour
         // Load sprites
         Sprite[] groundSourceSprites = Resources.LoadAll<Sprite>(groundSource.name);
 
+        Debug.Log(plannerBounds.size.x + " : " + plannerBounds.size.y);
+
         for (int x = 0; x < plannerBounds.size.x; x++)
         {
             for (int y=0; y < plannerBounds.size.y; y++)
-            { 
+            {
+                #region Tile Chooser
+                float tileChance = Random.Range(0f, 100f);
+                int tileRow = 0;
+
+                if (tileChance < chance_1)
+                    tileRow = 0;
+                else if (tileChance < chance_1 + chance_2)
+                    tileRow = 1;
+                else if (tileChance < chance_1 + chance_2 + chance_3)
+                    tileRow = 2;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4)
+                    tileRow = 3;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4 + chance_5)
+                    tileRow = 4;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4 + chance_5 + chance_6)
+                    tileRow = 5;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4 + chance_5 + chance_6 + chance_7)
+                    tileRow = 6;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4 + chance_5 + chance_6 + chance_7 + chance_8)
+                    tileRow = 7;
+                else if (tileChance < chance_1 + chance_2 + chance_3 + chance_4 + chance_5 + chance_6 + chance_7 + chance_8 + chance_9)
+                    tileRow = 8;
+                #endregion
+
                 #region Reset Tile Bools
                 TL_base = false;
                 TC_base = false;
@@ -58,6 +118,8 @@ public class ProcGenTiler : MonoBehaviour
 
                 if (plannerTile == null || plannerTile != plannerGroundTile)
                     continue;
+
+                Sprite spriteToSet = null;
 
                 #region Edge of Bounds check and bool set
                 if (x == 0)
@@ -161,70 +223,78 @@ public class ProcGenTiler : MonoBehaviour
                 }
                 #endregion
 
+                Debug.Log(x + " : " + y);
+
+                #region Set Tile based on bools
                 if (TL_base && TC_base && TR_base && ML_base && MR_base && BL_base && BC_base && BR_base)
                 {
                     // Center
+                    spriteToSet = groundSourceSprites[0 + tileRow * tilesPerRow];
                 }
-                
                 else if (TC_base && MR_base && ML_base && !BC_base)
                 {
                     // Bottom
+                    spriteToSet = groundSourceSprites[1 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && !ML_base && BC_base)
                 {
                     // Left
+                    spriteToSet = groundSourceSprites[2 + tileRow * tilesPerRow];
                 }
-
                 else if (!TC_base && MR_base && ML_base && BC_base)
                 {
                     // Top
+                    spriteToSet = groundSourceSprites[3 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && !MR_base && ML_base && BC_base)
                 {
                     // Right
+                    spriteToSet = groundSourceSprites[4 + tileRow * tilesPerRow];
                 }
-
                 else if (!TC_base && !MR_base && ML_base && BC_base)
                 {
                     // Top Right
+                    spriteToSet = groundSourceSprites[5 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && !MR_base && ML_base && !BC_base)
                 {
                     // Bottom Right
+                    spriteToSet = groundSourceSprites[6 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && !ML_base && !BC_base)
                 {
                     // Bottom Left
+                    spriteToSet = groundSourceSprites[7 + tileRow * tilesPerRow];
                 }
-
                 else if (!TC_base && MR_base && !ML_base && BC_base)
                 {
                     // Top Left
+                    spriteToSet = groundSourceSprites[8 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && ML_base && BC_base && !TL_base)
                 {
                     // Top Left Inner
+                    spriteToSet = groundSourceSprites[9 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && ML_base && BC_base && !TR_base)
                 {
                     // Top Right Inner
+                    spriteToSet = groundSourceSprites[10 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && ML_base && BC_base && !BR_base)
                 {
                     // Bottom Right Inner
+                    spriteToSet = groundSourceSprites[11 + tileRow * tilesPerRow];
                 }
-
                 else if (TC_base && MR_base && ML_base && BC_base && !BL_base)
                 {
                     // Bottom Left Inner
+                    spriteToSet = groundSourceSprites[12 + tileRow * tilesPerRow];
                 }
+                #endregion
+
+                //baseAllTiles[x + y * plannerBounds.size.x].;
+
             }
         }
     }
