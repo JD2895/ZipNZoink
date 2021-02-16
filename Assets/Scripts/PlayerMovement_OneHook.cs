@@ -82,11 +82,9 @@ public class PlayerMovement_OneHook : MonoBehaviour
     private float curHorInput = 0;
     private float curVerInput = 0;  // One Hook Variant
     //private bool fireRightHook = false;
-    private bool unhookRightHook = false;
     private float reelRightHook = 0;
     private bool jumpInput = false;
-    private bool dashDown = false;
-    private bool spinFlip = false;
+    //private bool dashDown = false;
 
     [Header("Visual Data")] // Most of this should eventually just be handles by an animator
     public Sprite[] playerSprites;
@@ -223,14 +221,6 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 jumpBufferTimer = 0;
                 jumpQueued = true;
             }
-
-            if (!spinFlipQueued)
-            {
-                if (spinFlip)
-                {
-                    spinFlipQueued = spinFlip;
-                }
-            }
         }
         else
         {
@@ -239,7 +229,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
             // Down dash queueing 
             if (!dashQueued)
             {
-                dashQueued = dashDown;
+                //dashQueued = dashDown;
             }
 
             if (IsHooked())

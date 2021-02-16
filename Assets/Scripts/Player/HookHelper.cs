@@ -27,10 +27,10 @@ public class HookHelper : MonoBehaviour
 
     #region Platform Interaction Variables
 
-    private GameObject collisionObj;
+    private GameObject collisionObj = null;
 
-    private Vector3 targetLastPos;
-    private Vector3 hookOffset;
+    private Vector3 targetLastPos = new Vector3();
+    private Vector3 hookOffset = new Vector3();
 
     private bool hookAttached;
     private bool targetMoving;

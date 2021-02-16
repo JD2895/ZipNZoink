@@ -14,8 +14,8 @@ public class PlayerMovement_v3 : MonoBehaviour
     [Header("Hook Setup")]
     public GameObject hookR_Object;     // The hook head for the right hook.
     public GameObject hookL_Object;     // The hook head for the left hook.
-    private HookController hookR_controller;
-    private HookController hookL_controller;
+    private HookController hookR_controller = null;
+    private HookController hookL_controller = null;
     public HookControllerCommonSetup commonHookData;    // Common data for hook setup
     private bool hookR_connected = false;
     private bool hookL_connected = false;

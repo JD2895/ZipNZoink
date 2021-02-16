@@ -10,10 +10,8 @@ public class ProcGenTiler : MonoBehaviour
     public TileBase plannerHazardTile = null;
 
     public Tilemap baseTMap = null;
-    public Texture2D groundSource = null;
     
     public Tilemap hazardTMap = null;
-    public Texture2D hazardSource = null;
 
     public List<TileAndChance> center_TileList;
     public List<TileAndChance> bottom_TileList;
@@ -38,8 +36,6 @@ public class ProcGenTiler : MonoBehaviour
     private bool BC_base;   // "    Center
     private bool BR_base;   // "    Right
 
-    private int tilesPerRow = 13;
-
     private void Start()
     {
         //plannerTMap.SetTile(new Vector3Int(2, 2, 0), plannerHazardTile);
@@ -63,7 +59,13 @@ public class ProcGenTiler : MonoBehaviour
                 plannerTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), plannerHazardTile);
             }
         }*/
-        GenerateTiles();
+        //GenerateTiles();
+    }
+
+    public void ClearTiles()
+    {
+        baseTMap.ClearAllTiles();
+        hazardTMap.ClearAllTiles();
     }
 
     public void GenerateTiles()
@@ -73,11 +75,6 @@ public class ProcGenTiler : MonoBehaviour
         BoundsInt plannerBounds = plannerTMap.cellBounds;
         TileBase[] plannerAllTiles = plannerTMap.GetTilesBlock(plannerBounds);
         TileBase[] baseAllTiles = baseTMap.GetTilesBlock(plannerBounds);
-
-        // Load sprites
-        Sprite[] groundSourceSprites = Resources.LoadAll<Sprite>(groundSource.name);
-
-        Debug.Log(plannerBounds.size.x + " : " + plannerBounds.size.y);
 
         for (int x = 0; x < plannerBounds.size.x; x++)
         {
@@ -212,7 +209,7 @@ public class ProcGenTiler : MonoBehaviour
                     // Center
                     tileToSet = ChooseTile(center_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && ML_base && !BC_base)
+                else if (!TC_base && MR_base && ML_base && BC_base)
                 {
                     // Bottom
                     tileToSet = ChooseTile(bottom_TileList, tileChance);
@@ -222,7 +219,7 @@ public class ProcGenTiler : MonoBehaviour
                     // Left
                     tileToSet = ChooseTile(left_TileList, tileChance);
                 }
-                else if (!TC_base && MR_base && ML_base && BC_base)
+                else if (TC_base && MR_base && ML_base && !BC_base)
                 {
                     // Top
                     tileToSet = ChooseTile(top_TileList, tileChance);
@@ -232,42 +229,42 @@ public class ProcGenTiler : MonoBehaviour
                     // Right
                     tileToSet = ChooseTile(right_TileList, tileChance);
                 }
-                else if (!TC_base && !MR_base && ML_base && BC_base)
+                else if (TC_base && !MR_base && ML_base && !BC_base)
                 {
                     // Top Right
                     tileToSet = ChooseTile(topRight_TileList, tileChance);
                 }
-                else if (TC_base && !MR_base && ML_base && !BC_base)
+                else if (!TC_base && !MR_base && ML_base && BC_base)
                 {
                     // Bottom Right
                     tileToSet = ChooseTile(bottomRight_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && !ML_base && !BC_base)
+                else if (!TC_base && MR_base && !ML_base && BC_base)
                 {
                     // Bottom Left
                     tileToSet = ChooseTile(bottomLeft_TileList, tileChance);
                 }
-                else if (!TC_base && MR_base && !ML_base && BC_base)
+                else if (TC_base && MR_base && !ML_base && !BC_base)
                 {
                     // Top Left
                     tileToSet = ChooseTile(topLeft_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && ML_base && BC_base && !TL_base)
+                else if (TC_base && MR_base && ML_base && BC_base && !BL_base)
                 {
                     // Top Left Inner
                     tileToSet = ChooseTile(topLeftInner_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && ML_base && BC_base && !TR_base)
+                else if (TC_base && MR_base && ML_base && BC_base && !BR_base)
                 {
                     // Top Right Inner
                     tileToSet = ChooseTile(topRightInner_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && ML_base && BC_base && !BR_base)
+                else if (TC_base && MR_base && ML_base && BC_base && !TR_base)
                 {
                     // Bottom Right Inner
                     tileToSet = ChooseTile(bottomRightInner_TileList, tileChance);
                 }
-                else if (TC_base && MR_base && ML_base && BC_base && !BL_base)
+                else if (TC_base && MR_base && ML_base && BC_base && !TL_base)
                 {
                     // Bottom Left Inner
                     tileToSet = ChooseTile(bottomLeftInner_TileList, tileChance);
@@ -276,7 +273,7 @@ public class ProcGenTiler : MonoBehaviour
 
                 //baseAllTiles[x + y * plannerBounds.size.x].;
                 if (tileToSet != null)
-                    baseTMap.SetTile(new Vector3Int(x + baseTMap.origin.x, y + baseTMap.origin.y, 0), tileToSet);
+                    baseTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), tileToSet);
                 else
                     Debug.LogError("No Tile to set");
 

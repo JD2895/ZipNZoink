@@ -10,7 +10,7 @@ public class CameraMovementController : MonoBehaviour
     public float aheadAmount;   // how far to move
     public float aheadSpeed;    // how quickly to move
 
-    private float curHorInput;
+    private float curHorInput = 0f;
 
     // Start is called before the first frame update
     void Start()
