@@ -201,8 +201,6 @@ public class ProcGenTiler : MonoBehaviour
                 }
                 #endregion
 
-                //Debug.Log(x + " : " + y);
-
                 #region Set Tile based on bools
                 if (TL_base && TC_base && TR_base && ML_base && MR_base && BL_base && BC_base && BR_base)
                 {
