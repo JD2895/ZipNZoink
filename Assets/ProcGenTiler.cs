@@ -10,7 +10,6 @@ public class ProcGenTiler : MonoBehaviour
     public TileBase plannerHazardTile = null;
 
     public Tilemap baseTMap = null;
-    
     public Tilemap hazardTMap = null;
 
     public List<TileAndChance> center_TileList;
@@ -36,36 +35,24 @@ public class ProcGenTiler : MonoBehaviour
     private bool BC_base;   // "    Center
     private bool BR_base;   // "    Right
 
-    private void Start()
-    {
-        //plannerTMap.SetTile(new Vector3Int(2, 2, 0), plannerHazardTile);
-        //plannerTMap.SetTile(new Vector3Int(0, 2, 0), plannerHazardTile);
-        //plannerTMap.SetTile(new Vector3Int(2, 0, 0), plannerHazardTile);
-        //plannerTMap.SetTile(new Vector3Int(0, 0, 0), plannerHazardTile);
-        //plannerTMap.ClearAllTiles();
-        /*
-        BoundsInt plannerBounds = plannerTMap.cellBounds;
-        TileBase[] plannerAllTiles = plannerTMap.GetTilesBlock(plannerBounds);
-
-        for (int x = 0; x < plannerBounds.size.x; x++)
-        {
-            for (int y = 0; y < plannerBounds.size.y; y++)
-            {
-                TileBase plannerTile = plannerAllTiles[x + y * plannerBounds.size.x];
-
-                if (plannerTile == null || plannerTile != plannerGroundTile)
-                    continue;
-
-                plannerTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), plannerHazardTile);
-            }
-        }*/
-        //GenerateTiles();
-    }
-
     public void ClearTiles()
     {
         baseTMap.ClearAllTiles();
         hazardTMap.ClearAllTiles();
+    }
+
+    public void HideShowPlanner()
+    {
+        TilemapRenderer tmapRend = plannerTMap.GetComponent<TilemapRenderer>();
+        tmapRend.enabled = !tmapRend.enabled;
+    }
+
+    public void HideShowActual()
+    {
+        TilemapRenderer tmapRend1 = baseTMap.GetComponent<TilemapRenderer>();
+        TilemapRenderer tmapRend2 = hazardTMap.GetComponent<TilemapRenderer>();
+        tmapRend1.enabled = !tmapRend1.enabled;
+        tmapRend2.enabled = !tmapRend2.enabled;
     }
 
     public void GenerateTiles()

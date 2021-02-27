@@ -6,7 +6,7 @@ using UnityEditor;
 using System;
 using System.Reflection;
 using System.Linq;
-
+/*
 [CustomEditor(typeof(ProcGenTiler))]
 public class ProcGenEditor : Editor
 {
@@ -32,6 +32,18 @@ public class ProcGenEditor : Editor
         if (GUILayout.Button("Clear Tiles"))
         {
             procGenTiler.ClearTiles();
+        }
+        GUILayout.EndHorizontal();
+        GUILayout.Space(5);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Hide/Show Planner"))
+        {
+            procGenTiler.HideShowPlanner();
+        }
+
+        if (GUILayout.Button("Hide/Show Actual"))
+        {
+            procGenTiler.HideShowActual();
         }
         GUILayout.EndHorizontal();
 
@@ -210,3 +222,4 @@ public static class SerializeTools
         return allTypes;
     }
 }
+*/

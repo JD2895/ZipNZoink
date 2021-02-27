@@ -188,77 +188,39 @@ public class PlayerMovement_OneHook : MonoBehaviour
 
     private void HandleJump(InputAction.CallbackContext obj)
     {
-        jumpInput = obj.performed;
-    }
-    #endregion
-
-    private void Update()
-    {
-        if (curHorInput > 0)
-        {
-            directionFacing = HoriDirection.Right;
-            playerSprite.sprite = playerSprites[0];
-        }
-        else if (curHorInput < 0)
-        {
-            directionFacing = HoriDirection.Left;
-            playerSprite.sprite = playerSprites[1];
-        }
-
-        hookSwingToApply = 0;
+        //Debug.Log("perf" + obj.performed);
+        //Debug.Log("star" + obj.started);
+        //Debug.Log("canc" + obj.canceled);
+        //jumpInput = obj.canceled;
+        //jumpInput = obj.started
 
         if (IsGrounded())
         {
-            // Set defaults
-            rb.gravityScale = rbDefaultGravityScale;
-            isAirJumping = false;
-            isWallSliding = false;
-
-            hangTimer = hangTime;
-
             if (jumpBufferTimer > 0)
             {
                 jumpBufferTimer = 0;
-                jumpQueued = true;
+                jumpQueued = obj.performed;
             }
         }
         else
         {
-            hangTimer -= Time.deltaTime;
-
-            // Down dash queueing 
-            if (!dashQueued)
-            {
-                //dashQueued = dashDown;
-            }
-
             if (IsHooked())
             {
-                // Set defaults
-                rb.gravityScale = rbDefaultGravityScale;
-
-                curHorSpeed = rb.velocity.x;
-                hookSwingToApply = curHorInput * horHookMoveMult;
-                //directionWhenJumpStarted = directionFacing; // temp fix
-
                 if (!jumpQueued)
                 {
-                    jumpQueued = jumpInput;
+                    jumpQueued = obj.performed;
                 }
-
-                isWallSliding = false;
             }
             else if (isWallSliding)
             {
                 if (!wallJumpQueued)
                 {
-                    wallJumpQueued = jumpInput;
+                    wallJumpQueued = obj.performed;
                 }
             }
-            //In the air, unhooked
             else
             {
-                if (!jumpInput && !isAirJumping)
+                if (obj.canceled && !isAirJumping)
                 {
                     if (rb.velocity.y > jumpCutoff)
                     {
@@ -295,7 +257,117 @@ public class PlayerMovement_OneHook : MonoBehaviour
         {
             if (!jumpQueued)
             {
-                jumpQueued = jumpInput;
+                jumpQueued = obj.performed;
+            }
+        }
+
+    }
+    #endregion
+
+    private void Update()
+    {
+        if (curHorInput > 0)
+        {
+            directionFacing = HoriDirection.Right;
+            playerSprite.sprite = playerSprites[0];
+        }
+        else if (curHorInput < 0)
+        {
+            directionFacing = HoriDirection.Left;
+            playerSprite.sprite = playerSprites[1];
+        }
+
+        hookSwingToApply = 0;
+
+        if (IsGrounded())
+        {
+            // Set defaults
+            rb.gravityScale = rbDefaultGravityScale;
+            isAirJumping = false;
+            isWallSliding = false;
+
+            hangTimer = hangTime;
+
+            if (jumpBufferTimer > 0)
+            {
+                //jumpBufferTimer = 0;
+                //jumpQueued = true;
+            }
+        }
+        else
+        {
+            hangTimer -= Time.deltaTime;
+
+            // Down dash queueing 
+            if (!dashQueued)
+            {
+                //dashQueued = dashDown;
+            }
+
+            if (IsHooked())
+            {
+                // Set defaults
+                rb.gravityScale = rbDefaultGravityScale;
+
+                curHorSpeed = rb.velocity.x;
+                hookSwingToApply = curHorInput * horHookMoveMult;
+                //directionWhenJumpStarted = directionFacing; // temp fix
+
+                if (!jumpQueued)
+                {
+                    //jumpQueued = jumpInput;
+                }
+
+                isWallSliding = false;
+            }
+            else if (isWallSliding)
+            {
+                if (!wallJumpQueued)
+                {
+                    //wallJumpQueued = jumpInput;
+                }
+            }
+            //In the air, unhooked
+            /*
+            else
+            {
+                if (!jumpInput && !isAirJumping)
+                {
+                    if (rb.velocity.y > jumpCutoff)
+                    {
+                        rb.gravityScale = rbDefaultGravityScale * jumpCancelGravityMult; // need to put in a check, if the player is falling faster than a 'max fall speed', change gravity scale back to default
+                    }
+                }
+                //check for wall in the direction the player is currently moving
+                //if player colides with that wall, set wall sliding to true
+                //To make sure the player doesn't get stuck on small blocks
+                if (rb.velocity.y < 12.0f)
+                {
+                    if (curHorInput != 0)
+                    {
+                        float distance = 0.03f;
+                        Vector3 castOrigin = bottomCollider.bounds.center;
+                        Vector2 castSize = new Vector2(bottomCollider.radius * 2, bottomCollider.radius * 2);
+                        RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0.0f), distance, groundLayer);
+
+                        isWallSliding = raycastHit.collider != null;
+                        if (isWallSliding)
+                        {
+                            //Using this to correct for oddities with adjusting the gravity scale above
+                            rb.gravityScale = rbDefaultGravityScale;
+
+                            wallSide = (int)directionFacing;
+                        }
+                    }
+                }
+            }*/
+        }
+        // Hang time
+        if (hangTimer > 0.0f)
+        {
+            if (!jumpQueued)
+            {
+                //jumpQueued = jumpInput;
             }
         }
 
@@ -529,7 +601,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
         // Hook Jump
         else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
         {
-            //Debug.Log("Hook Jump!");
+            Debug.Log("Hook Jump!");
             jumpQueued = false;
             DetachHook.Invoke();
 

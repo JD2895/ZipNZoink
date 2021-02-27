@@ -396,7 +396,7 @@ MonoBehaviour:
   maxHorizontalAirSpeed: 7
   dashForceMult: 55
   horHookMoveMult: 17
-  hookJumpForceMult: 0.4
+  hookJumpForceMult: 16
   hookJumpHorizMult: 0.7
   superHookJumpForceMult: 26
   wallSlideSpeed: 0
