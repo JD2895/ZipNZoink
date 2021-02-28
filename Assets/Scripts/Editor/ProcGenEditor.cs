@@ -6,7 +6,7 @@ using UnityEditor;
 using System;
 using System.Reflection;
 using System.Linq;
-/*
+
 [CustomEditor(typeof(ProcGenTiler))]
 public class ProcGenEditor : Editor
 {
@@ -222,4 +222,3 @@ public static class SerializeTools
         return allTypes;
     }
 }
-*/

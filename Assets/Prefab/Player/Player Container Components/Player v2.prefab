@@ -400,7 +400,7 @@ MonoBehaviour:
   hookJumpHorizMult: 0.7
   superHookJumpForceMult: 26
   wallSlideSpeed: 0
-  wallJumpOffSpeed: 8.5
+  wallJumpOffSpeed: 3
   hangTime: 0.2
   hangTimer: 0
   curHorSpeed: 0

@@ -38,7 +38,7 @@ public class ProcGenTiler : MonoBehaviour
     public void ClearTiles()
     {
         baseTMap.ClearAllTiles();
-        hazardTMap.ClearAllTiles();
+        //hazardTMap.ClearAllTiles();
     }
 
     public void HideShowPlanner()
