@@ -26,7 +26,6 @@ public class HookHelper : MonoBehaviour
     private float maxCastDistance = 99f;
 
     #region Platform Interaction Variables
-
     private GameObject collisionObj = null;
 
     private Vector3 targetLastPos = new Vector3();
@@ -112,9 +111,6 @@ public class HookHelper : MonoBehaviour
             hitGround = true;
             firing = false;
             hookAttached = true;
-            //collisionObj = collision.gameObject;
-            //targetLastPos = collision.transform.position;
-            //hookOffset = transform.position - targetLastPos;
 
             this.transform.SetParent(collision.transform);
             rb.bodyType = RigidbodyType2D.Kinematic;    // Fixes the hook in place
@@ -129,31 +125,6 @@ public class HookHelper : MonoBehaviour
             OnHookHitHazard?.Invoke(hookSide);
         }
     }
-
-    /*
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-        if (collision.gameObject == collisionObj && hookAttached)
-        {
-            AlignHookWithGround(collision.transform.position);
-        }
-    }
-    */
-
-    /*
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.gameObject == collisionObj)
-        {
-            hookAttached = false;
-            collisionObj = null;
-
-            hookOffset = Vector3.zero;
-            targetLastPos = Vector3.zero;
-        }
-
-    }
-    */
 
     private GUIStyle bigFont = new GUIStyle();
 

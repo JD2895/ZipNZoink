@@ -601,11 +601,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
 
     private void HookHitHazard(HookSide hookSide)
     {
-
-        if (hookSide == HookSide.Right)
-        {
-            hookR_controller.DisconnectHook();
-        }
+        DetachHook.Invoke();
     }
 
     public int EvaluateHookState()

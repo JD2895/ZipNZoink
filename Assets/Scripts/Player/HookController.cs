@@ -22,6 +22,14 @@ public class HookController : MonoBehaviour
     public bool h_out = false;         // Keeps track of if the hook is 'out' of the player
     public bool h_onGround = false;    // Keeps track of if the hook is currently connected to the ground
 
+    // Particle system
+    public ParticleSystem line_ps;
+
+    void Start()
+    {
+        line_ps = GetComponent<ParticleSystem>();
+    }
+
     private void FixedUpdate()
     {
         if (h_onGround)
@@ -83,7 +91,6 @@ public class HookController : MonoBehaviour
         // Hook movement setup
         reelPerSec = maxReelSpeed / timeToMaxReelSpeed;
         // Other
-        //PlayerMovement_v3.DetachHook.AddListener(DisconnectHook);
         PlayerMovement_OneHook.DetachHook.AddListener(DisconnectHook);
         h_Object.SetActive(false);
     }
@@ -120,10 +127,34 @@ public class HookController : MonoBehaviour
 
     public void DisconnectHook()
     {
+        DisconnectParticleEffect();
         h_out = false;
         ChangeHookConnectedState(false);
         h_Object.SetActive(false);
         h_onGround = false;
+    }
+
+    private void DisconnectParticleEffect()
+    {
+        // Get info for changing shape
+        Vector3 hereToHook = h_Object.transform.position - this.transform.position;
+        float rotation = Vector3.SignedAngle(Vector3.up, hereToHook, Vector3.forward);
+        float lineLength = Vector3.Distance(this.transform.position, h_Object.transform.position);
+
+        // Change number of particles emitted based on length
+        var em = line_ps.emission;
+        em.SetBursts(
+             new ParticleSystem.Burst[] {
+                  new ParticleSystem.Burst (0.0f, lineLength * 8)
+             });
+
+        // Change shape
+        var sh = line_ps.shape;
+        sh.position = Vector3.zero + hereToHook.normalized * (lineLength / 2);
+        sh.rotation = new Vector3(0, 0, rotation);
+        sh.scale = new Vector3(0, lineLength, 0);
+
+        line_ps.Play();
     }
 
     public void ChangeHookConnectedState(bool toState)
