@@ -10,8 +10,8 @@ public class DebugUIHelper : MonoBehaviour
 {
     public GameObject debugMenu;
 
-    public Slider hookVariantSlider;
-    public Toggle hookJumpToggle;
+    //public Slider hookVariantSlider;
+    //public Toggle hookJumpToggle;
     public Toggle debugTextToggle;
     public Button restartButton;
     public List<string> listOfLevels;
@@ -40,7 +40,6 @@ public class DebugUIHelper : MonoBehaviour
 
     private void HandleMenu(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        Debug.Log("here");
         debugMenu.SetActive(!debugMenu.activeSelf);
         Time.timeScale = debugMenu.activeSelf ? 0f : 1f;
 
@@ -60,8 +59,8 @@ public class DebugUIHelper : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(restartButton.gameObject);
 
         // Set UI based on current session's values
-        hookVariantSlider.normalizedValue = (float)DebugUIController.instance.hookFireVar - 0.5f;   // the 0.5 is needed otherwise it just rounds to the next highest/lowest value???
-        hookJumpToggle.isOn = DebugUIController.instance.hookJump;
+        //hookVariantSlider.normalizedValue = (float)DebugUIController.instance.hookFireVar - 0.5f;   // the 0.5 is needed otherwise it just rounds to the next highest/lowest value???
+        //hookJumpToggle.isOn = DebugUIController.instance.hookJump;
         debugTextToggle.isOn = DebugUIController.instance.debugText;
 
 
@@ -96,7 +95,7 @@ public class DebugUIHelper : MonoBehaviour
         if (variantNumber == 2f)
         {
             DebugUIController.instance.hookJump = true;
-            hookJumpToggle.isOn = true;
+            //hookJumpToggle.isOn = true;
         }
     }
 

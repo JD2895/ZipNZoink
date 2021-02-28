@@ -23,7 +23,7 @@ public class DebugUIController : MonoBehaviour
         }
     }
 
-    // Spin Hook Jump availability
+    // Hook Jump availability
     [SerializeField] private bool _hookJump = true;
     public bool hookJump
     {

@@ -36,6 +36,10 @@ public class PlayerMovement_OneHook : MonoBehaviour
     public float jumpBufferTime = 0.1f;
     private bool jumpBuffered = false;
     private bool jumpCancelling = false;
+    //hangTime is used to allow the player a little bit of time to jump after walking off of a ledge 
+    public float hangTime = 0.2f;
+    //hangTimer does not need to be public, currently is public for testing
+    public float hangTimer;
 
     [Header("Air Movement")]
     public float airAccelerateValue = 10;
@@ -56,11 +60,10 @@ public class PlayerMovement_OneHook : MonoBehaviour
     public float wallSlideSpeed = 0.0f;
     //The speed the player jumps off the wall in the x direction
     public float wallJumpOffSpeed = 8.5f;
-    //hangTime is used to allow the player a little bit of time to jump after walking off of a ledge 
-    public float hangTime = 0.2f;
-    //hangTimer does not need to be public, currently is public for testing
-    public float hangTimer;
+    public float wallJumpBufferTime;
+    private bool wallJumpBufferValid = false;
     private bool isWallSliding = false;
+    private bool isOnWall = false;
     private bool wallJumpQueued;
     private int wallSide = 0;
     public float curHorSpeed; // Use inspector in debug mode to see this
@@ -69,8 +72,6 @@ public class PlayerMovement_OneHook : MonoBehaviour
     [Header("Movement Helpers")]
     private float hookSwingToApply;
     private bool jumpQueued = false;
-    private bool spinFlipQueued = false;
-    private bool dashQueued = false;
     private bool isAirJumping;
     private HoriDirection directionFacing;    // -1 is left, 1 is right
     private HoriDirection directionWhenJumpStarted;
@@ -196,7 +197,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 jumpQueued = obj.performed;
             }
         }
-        else if (isWallSliding)
+        else if (isWallSliding || wallJumpBufferValid)
         {
             if (!wallJumpQueued)
             {
@@ -210,29 +211,6 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 if (rb.velocity.y > jumpCutoff)
                 {
                     rb.gravityScale = rbDefaultGravityScale * jumpCancelGravityMult; // need to put in a check, if the player is falling faster than a 'max fall speed', change gravity scale back to default
-                }
-            }
-
-            //check for wall in the direction the player is currently moving
-            //if player collides with that wall, set wall sliding to true
-            //To make sure the player doesn't get stuck on small blocks
-            if (rb.velocity.y < 12.0f)
-            {
-                if (curHorInput != 0)
-                {
-                    float distance = 0.03f;
-                    Vector3 castOrigin = bottomCollider.bounds.center;
-                    Vector2 castSize = new Vector2(bottomCollider.radius * 2, bottomCollider.radius * 2);
-                    RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0.0f), distance, groundLayer);
-
-                    isWallSliding = raycastHit.collider != null;
-                    if (isWallSliding)
-                    {
-                        //Using this to correct for oddities with adjusting the gravity scale above
-                        rb.gravityScale = rbDefaultGravityScale;
-
-                        wallSide = (int)directionFacing;
-                    }
                 }
             }
 
@@ -265,6 +243,14 @@ public class PlayerMovement_OneHook : MonoBehaviour
         yield return null;
     }
 
+    public IEnumerator WallJumpBufferTimer(float bufferTime)
+    {
+        wallJumpBufferValid = true;
+        yield return new WaitForSeconds(bufferTime);
+        wallJumpBufferValid = false;
+        yield return null;
+    }
+
     private void Update()
     {
         if (curHorInput > 0)
@@ -286,6 +272,8 @@ public class PlayerMovement_OneHook : MonoBehaviour
             rb.gravityScale = rbDefaultGravityScale;
             isAirJumping = false;
             isWallSliding = false;
+            wallJumpBufferValid = false;
+            isOnWall = false;
 
             hangTimer = hangTime;
         }
@@ -302,8 +290,24 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 hookSwingToApply = curHorInput * horHookMoveMult;
 
                 isWallSliding = false;
+            } 
+            else
+            {
+                // Check for pressing against wall or if still on wall
+                if (curHorInput != 0 || isOnWall)
+                {
+                    float distance = 0.03f;
+                    Vector3 castOrigin = bottomCollider.bounds.center;
+                    Vector2 castSize = new Vector2(bottomCollider.radius * 2f, bottomCollider.radius * 0.6f);
+                    RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0.0f), distance, groundLayer);
+
+                    // TODO: Change this to explicitly check for ground?
+                    isOnWall = raycastHit.collider != null;
+                    wallSide = (int)directionFacing;
+                }
             }
         }
+
 
         // Hang time
         if (hangTimer > 0.0f)
@@ -368,7 +372,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
             }
             else if (isWallSliding)
             {
-                HandleWallSliding();
+                //HandleWallSliding();
             }
             else
             {
@@ -380,34 +384,46 @@ public class PlayerMovement_OneHook : MonoBehaviour
             ApplyGroundMovement();
         }
 
+        HandleWallSliding();
         JumpLogic();
     }
 
     private void HandleWallSliding()
     {
-        rb.velocity = new Vector2(0, wallSlideSpeed);
-        if (wallJumpQueued)
+        //check for wall in the direction the player is currently moving
+        //if player collides with that wall, set wall sliding to true
+        //To make sure the player doesn't get stuck on small blocks
+        if (rb.velocity.y < 2.0f && isOnWall && curHorInput != 0)
         {
-            // Regular jump
-            wallJumpQueued = false;
-            directionWhenJumpStarted = directionFacing;
-
-            ApplyJump(0, jumpForce);
-            curHorSpeed = -wallSide * wallJumpOffSpeed;
-            isWallSliding = false;
+            isWallSliding = true;
+            //Using this to correct for oddities with adjusting the gravity scale
             rb.gravityScale = rbDefaultGravityScale;
         }
         else
         {
-            //Get off the wall if the player presses away from it
-            if (curHorInput * wallSide <= 0)
-            {
-                if (curHorInput * wallSide < 0)
-                    curHorSpeed = -wallSide * wallJumpOffSpeed;
-                isWallSliding = false;
-                rb.gravityScale = rbDefaultGravityScale;
+            isWallSliding = false;
+        }
 
+        if (isWallSliding)
+        {
+            rb.velocity = new Vector2(0, wallSlideSpeed);
+        }
+
+        //Get off the wall if the player presses away from it
+        if (curHorInput * wallSide <= 0)
+        {
+            if (isWallSliding)
+                StartCoroutine(WallJumpBufferTimer(wallJumpBufferTime));
+
+            if (curHorInput * wallSide < 0 && wallJumpBufferValid)
+            {
+                Debug.Log("Getting here");
+                curHorSpeed = -wallSide * wallJumpOffSpeed;
             }
+
+            isWallSliding = false;
+            rb.gravityScale = rbDefaultGravityScale;
+
         }
     }
 
@@ -548,6 +564,19 @@ public class PlayerMovement_OneHook : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
             ApplyJump(0, hookJumpForceMult);
         }
+
+        // Wall Jump
+        if (wallJumpQueued)
+        {
+            wallJumpQueued = false;
+            directionWhenJumpStarted = directionFacing;
+
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            ApplyJump(-wallSide * wallJumpOffSpeed, jumpForce);
+            curHorSpeed = -wallSide * wallJumpOffSpeed;
+            isWallSliding = false;
+            rb.gravityScale = rbDefaultGravityScale;
+        }
     }
 
     private void ApplyJump(float xforce, float yforce)
@@ -632,12 +661,18 @@ public class PlayerMovement_OneHook : MonoBehaviour
         if (DebugOptions.debugText)
         {
             bigFont.fontSize = 20;
+            bigFont.normal.textColor = Color.white;
 
             GUI.Label(new Rect(100, 200, 1000, 1000),
-                "IsGrounded? " + IsGrounded() +
+                  "OnGround? " + IsGrounded() +
                 "\nIsHooked? " + IsHooked() +
-                "\ncurHorSpeed? " + curHorSpeed +
-                "\nHookR_Connected: " + hookR_connected,
+                "\nW. Slide? " + isWallSliding +
+                "\nWJmpBuff? " + jumpBuffered +
+                "\nIsOnWall? " + isOnWall +
+                "\nJumpBuff? " + jumpBuffered
+                //"\ncurHorSpeed? " + curHorSpeed +
+                //"\nHookR_Connected: " + hookR_connected
+                ,
                 bigFont);
         }
     }
