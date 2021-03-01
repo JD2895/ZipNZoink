@@ -46,6 +46,8 @@ public class PlayerMovement_OneHook : MonoBehaviour
     public float airDecelerateValue = 10;
     public float maxHorizontalAirSpeed = 7;
     public float dashForceMult = 38.3f;
+    public float wallJumpAirDisableTime = 0.2f;
+    private bool allowAirMovement = true;
 
     [Header("Hook Movement")]
     public float horHookMoveMult = 30;
@@ -59,7 +61,8 @@ public class PlayerMovement_OneHook : MonoBehaviour
     //NOTE: might, if using values lower than 0, have to clamp to that value
     public float wallSlideSpeed = 0.0f;
     //The speed the player jumps off the wall in the x direction
-    public float wallJumpOffSpeed = 8.5f;
+    public float wallStepOffSpeed = 8.5f;
+    public float wallJumpOffForce = 8.5f;
     public float wallJumpBufferTime;
     private bool wallJumpBufferValid = false;
     private bool isWallSliding = false;
@@ -164,7 +167,10 @@ public class PlayerMovement_OneHook : MonoBehaviour
     #region Input Handlers
     private void HandleHorizontalAxis(InputAction.CallbackContext obj)
     {
-        curHorInput = obj.ReadValue<float>();
+        if (!allowAirMovement)
+            curHorInput = 0;
+        else
+            curHorInput = obj.ReadValue<float>();
         if (Mathf.Abs(curHorInput) < deadZoneValue) //deadzone check
         {
             curHorInput = 0;
@@ -240,7 +246,6 @@ public class PlayerMovement_OneHook : MonoBehaviour
         jumpBuffered = true;
         yield return new WaitForSeconds(bufferTime);
         jumpBuffered = false;
-        yield return null;
     }
 
     public IEnumerator WallJumpBufferTimer(float bufferTime)
@@ -248,7 +253,13 @@ public class PlayerMovement_OneHook : MonoBehaviour
         wallJumpBufferValid = true;
         yield return new WaitForSeconds(bufferTime);
         wallJumpBufferValid = false;
-        yield return null;
+    }
+
+    public IEnumerator DisableAirMovement(float disableTime)
+    {
+        allowAirMovement = false;
+        yield return new WaitForSeconds(disableTime);
+        allowAirMovement = true;
     }
 
     private void Update()
@@ -376,7 +387,14 @@ public class PlayerMovement_OneHook : MonoBehaviour
             }
             else
             {
-                ApplyHorizontalAirMovement();
+                if (allowAirMovement)
+                {
+                    ApplyHorizontalAirMovement();
+                }
+                else
+                {
+                    curHorSpeed = rb.velocity.x;
+                }
             }
         }
         else
@@ -418,7 +436,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
             if (curHorInput * wallSide < 0 && wallJumpBufferValid)
             {
                 Debug.Log("Getting here");
-                curHorSpeed = -wallSide * wallJumpOffSpeed;
+                curHorSpeed = -wallSide * wallStepOffSpeed;
             }
 
             isWallSliding = false;
@@ -568,12 +586,13 @@ public class PlayerMovement_OneHook : MonoBehaviour
         // Wall Jump
         if (wallJumpQueued)
         {
+            // Temporarily disable air movement
+            StartCoroutine(DisableAirMovement(wallJumpAirDisableTime));
             wallJumpQueued = false;
             directionWhenJumpStarted = directionFacing;
 
             rb.velocity = new Vector2(rb.velocity.x, 0f);
-            ApplyJump(-wallSide * wallJumpOffSpeed, jumpForce);
-            curHorSpeed = -wallSide * wallJumpOffSpeed;
+            ApplyJump(-wallSide * wallJumpOffForce, jumpForce);
             isWallSliding = false;
             rb.gravityScale = rbDefaultGravityScale;
         }

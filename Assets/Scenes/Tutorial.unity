@@ -31890,6 +31890,16 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7451540361882287692, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: wallJumpAirDisableTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7451540361882287692, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: wallStepOffSpeed
+      value: 3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fd785d73575cb814e8576312439ac933, type: 3}
 --- !u!1001 &1475885328
