@@ -399,12 +399,14 @@ MonoBehaviour:
   airDecelerateValue: 10
   maxHorizontalAirSpeed: 7
   dashForceMult: 55
+  wallJumpAirDisableTime: 0.1
   horHookMoveMult: 17
   hookJumpForceMult: 16
   hookJumpHorizMult: 0.7
   superHookJumpForceMult: 26
   wallSlideSpeed: 0
-  wallJumpOffSpeed: 3
+  wallStepOffSpeed: 2
+  wallJumpOffForce: 8.5
   wallJumpBufferTime: 1
   curHorSpeed: 0
   watchthis: {x: 0, y: 0}

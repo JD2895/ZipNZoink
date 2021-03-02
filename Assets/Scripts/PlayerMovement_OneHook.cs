@@ -64,8 +64,9 @@ public class PlayerMovement_OneHook : MonoBehaviour
     public float wallStepOffSpeed = 8.5f;
     public float wallJumpOffForce = 8.5f;
     public float wallJumpBufferTime;
-    private bool wallJumpBufferValid = false;
+    private bool wallJumpBuffered = false;
     private bool isWallSliding = false;
+    private bool hasWallBehind = false;
     private bool isOnWall = false;
     private bool wallJumpQueued;
     private int wallSide = 0;
@@ -167,10 +168,8 @@ public class PlayerMovement_OneHook : MonoBehaviour
     #region Input Handlers
     private void HandleHorizontalAxis(InputAction.CallbackContext obj)
     {
-        if (!allowAirMovement)
-            curHorInput = 0;
-        else
-            curHorInput = obj.ReadValue<float>();
+        curHorInput = obj.ReadValue<float>();
+
         if (Mathf.Abs(curHorInput) < deadZoneValue) //deadzone check
         {
             curHorInput = 0;
@@ -203,7 +202,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 jumpQueued = obj.performed;
             }
         }
-        else if (isWallSliding || wallJumpBufferValid)
+        else if (isWallSliding)
         {
             if (!wallJumpQueued)
             {
@@ -250,9 +249,9 @@ public class PlayerMovement_OneHook : MonoBehaviour
 
     public IEnumerator WallJumpBufferTimer(float bufferTime)
     {
-        wallJumpBufferValid = true;
+        wallJumpBuffered = true;
         yield return new WaitForSeconds(bufferTime);
-        wallJumpBufferValid = false;
+        wallJumpBuffered = false;
     }
 
     public IEnumerator DisableAirMovement(float disableTime)
@@ -283,8 +282,9 @@ public class PlayerMovement_OneHook : MonoBehaviour
             rb.gravityScale = rbDefaultGravityScale;
             isAirJumping = false;
             isWallSliding = false;
-            wallJumpBufferValid = false;
+            wallJumpBuffered = false;
             isOnWall = false;
+            hasWallBehind = false;
 
             hangTimer = hangTime;
         }
@@ -310,11 +310,13 @@ public class PlayerMovement_OneHook : MonoBehaviour
                     float distance = 0.03f;
                     Vector3 castOrigin = bottomCollider.bounds.center;
                     Vector2 castSize = new Vector2(bottomCollider.radius * 2f, bottomCollider.radius * 0.6f);
-                    RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0.0f), distance, groundLayer);
-
-                    // TODO: Change this to explicitly check for ground?
+                    RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0f), distance, groundLayer);
+                    RaycastHit2D raycastHitBehind = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing * -1, 0f), distance, groundLayer);
+                    
                     isOnWall = raycastHit.collider != null;
-                    wallSide = (int)directionFacing;
+                    hasWallBehind = raycastHitBehind.collider != null;
+                    if (isOnWall)
+                        wallSide = (int)directionFacing;
                 }
             }
         }
@@ -425,23 +427,16 @@ public class PlayerMovement_OneHook : MonoBehaviour
         if (isWallSliding)
         {
             rb.velocity = new Vector2(0, wallSlideSpeed);
+            curHorSpeed = 0;
         }
 
-        //Get off the wall if the player presses away from it
-        if (curHorInput * wallSide <= 0)
+        // Slide/Step off the wall
+        if (hasWallBehind && curHorInput * wallSide < 0)
         {
-            if (isWallSliding)
-                StartCoroutine(WallJumpBufferTimer(wallJumpBufferTime));
-
-            if (curHorInput * wallSide < 0 && wallJumpBufferValid)
-            {
-                Debug.Log("Getting here");
-                curHorSpeed = -wallSide * wallStepOffSpeed;
-            }
-
-            isWallSliding = false;
+            curHorSpeed = -wallSide * wallStepOffSpeed;
+            hasWallBehind = false;
+            //isWallSliding = false;
             rb.gravityScale = rbDefaultGravityScale;
-
         }
     }
 
@@ -682,10 +677,13 @@ public class PlayerMovement_OneHook : MonoBehaviour
                   "OnGround? " + IsGrounded() +
                 "\nIsHooked? " + IsHooked() +
                 "\nW. Slide? " + isWallSliding +
-                "\nWJmpBuff? " + jumpBuffered +
+                //"\nWJmpBuff? " + jumpBuffered +
                 "\nIsOnWall? " + isOnWall +
-                "\nJumpBuff? " + jumpBuffered
+                "\nSpeed w wall? " + (curHorInput * wallSide) +
+                "\nHasWallB? " + hasWallBehind
+                //"\nJumpBuff? " + jumpBuffered +
                 //"\ncurHorSpeed? " + curHorSpeed +
+                //"\ncurHorInput? " + curHorInput
                 //"\nHookR_Connected: " + hookR_connected
                 ,
                 bigFont);
