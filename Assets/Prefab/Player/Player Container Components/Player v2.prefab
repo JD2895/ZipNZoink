@@ -405,9 +405,9 @@ MonoBehaviour:
   hookJumpHorizMult: 0.7
   superHookJumpForceMult: 26
   wallSlideSpeed: 0
-  wallStepOffSpeed: 2
+  wallStepOffSpeed: 3.2
   wallJumpOffForce: 8.5
-  wallJumpBufferTime: 1
+  wallJumpBufferTime: 0.1
   curHorSpeed: 0
   watchthis: {x: 0, y: 0}
   playerSprites:

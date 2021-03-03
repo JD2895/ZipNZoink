@@ -235,6 +235,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
         {
             //Debug.Log("Jump Buffered");
             StartCoroutine(JumpBufferTimer(jumpBufferTime));
+            StartCoroutine(WallJumpBufferTimer(wallJumpBufferTime));
         }
 
     }
@@ -316,7 +317,13 @@ public class PlayerMovement_OneHook : MonoBehaviour
                     isOnWall = raycastHit.collider != null;
                     hasWallBehind = raycastHitBehind.collider != null;
                     if (isOnWall)
+                    {
                         wallSide = (int)directionFacing;
+                        if (wallJumpBuffered)
+                        {
+                            wallJumpQueued = true;
+                        }
+                    }
                 }
             }
         }
@@ -581,12 +588,15 @@ public class PlayerMovement_OneHook : MonoBehaviour
         // Wall Jump
         if (wallJumpQueued)
         {
+            Debug.Log("wall jump!");
             // Temporarily disable air movement
             StartCoroutine(DisableAirMovement(wallJumpAirDisableTime));
             wallJumpQueued = false;
+            wallJumpBuffered = false;
             directionWhenJumpStarted = directionFacing;
 
-            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            //rb.velocity = new Vector2(rb.velocity.x, 0f);
+            rb.velocity = new Vector2(0f, 0f);
             ApplyJump(-wallSide * wallJumpOffForce, jumpForce);
             isWallSliding = false;
             rb.gravityScale = rbDefaultGravityScale;
