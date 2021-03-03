@@ -588,14 +588,12 @@ public class PlayerMovement_OneHook : MonoBehaviour
         // Wall Jump
         if (wallJumpQueued)
         {
-            Debug.Log("wall jump!");
             // Temporarily disable air movement
             StartCoroutine(DisableAirMovement(wallJumpAirDisableTime));
             wallJumpQueued = false;
             wallJumpBuffered = false;
             directionWhenJumpStarted = directionFacing;
 
-            //rb.velocity = new Vector2(rb.velocity.x, 0f);
             rb.velocity = new Vector2(0f, 0f);
             ApplyJump(-wallSide * wallJumpOffForce, jumpForce);
             isWallSliding = false;

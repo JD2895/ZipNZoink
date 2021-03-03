@@ -34054,11 +34054,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 7451540361882287692, guid: fd785d73575cb814e8576312439ac933,
-        type: 3}
-      propertyPath: wallJumpBufferTime
-      value: 0.1
-      objectReference: {fileID: 0}
     - target: {fileID: 7936623585661851762, guid: fd785d73575cb814e8576312439ac933,
         type: 3}
       propertyPath: EmissionModule.m_Bursts.Array.size

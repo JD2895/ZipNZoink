@@ -107,6 +107,7 @@ public class HookController : MonoBehaviour
                     h_out = true;
                     h_Object.SetActive(true);
                     h_Object.GetComponent<HookHelper>().FireHook(this.transform.position, firingDirection);
+                    StartContinuousPartileEffect();
                 }
             }
             else if (h_out)
@@ -145,8 +146,17 @@ public class HookController : MonoBehaviour
         var em = line_ps.emission;
         em.SetBursts(
              new ParticleSystem.Burst[] {
-                  new ParticleSystem.Burst (0.0f, lineLength * 8)
+                  new ParticleSystem.Burst (0.0f, lineLength * 2.5f)
              });
+
+        // Change velocity
+        var vel = line_ps.velocityOverLifetime;
+        vel.x = new ParticleSystem.MinMaxCurve(-5f, 5f);
+        vel.y = new ParticleSystem.MinMaxCurve(-5f, 5f);
+
+        // Change looping
+        var main = line_ps.main;
+        main.loop = false;
 
         // Change shape
         var sh = line_ps.shape;
@@ -155,6 +165,50 @@ public class HookController : MonoBehaviour
         sh.scale = new Vector3(0, lineLength, 0);
 
         line_ps.Play();
+    }
+
+    private void StartContinuousPartileEffect()
+    {
+        // Change looping
+        var main = line_ps.main;
+        main.loop = true;
+
+        // Disable bursts
+        var em = line_ps.emission;
+        em.SetBursts(
+             new ParticleSystem.Burst[0] { });
+
+        // Change velocity
+        var vel = line_ps.velocityOverLifetime;
+        vel.x = new ParticleSystem.MinMaxCurve(-2f, 2f);
+        vel.y = new ParticleSystem.MinMaxCurve(-2f, 2f);
+
+        line_ps.Play();
+        StartCoroutine(ContinuousParticleEffectMaintenance());
+    }
+
+    private IEnumerator ContinuousParticleEffectMaintenance()
+    {
+        while (line_ps.isPlaying)
+        {
+            // Get info for changing shape
+            Vector3 hereToHook = h_Object.transform.position - this.transform.position;
+            float rotation = Vector3.SignedAngle(Vector3.up, hereToHook, Vector3.forward);
+            float lineLength = Vector3.Distance(this.transform.position, h_Object.transform.position);
+
+            // Change number of particles emitted based on length
+            var em = line_ps.emission;
+            em.rateOverTime = lineLength * 3.5f;
+
+            // Change shape
+            var sh = line_ps.shape;
+            sh.position = Vector3.zero + hereToHook.normalized * (lineLength / 2);
+            sh.rotation = new Vector3(0, 0, rotation);
+            sh.scale = new Vector3(0, lineLength, 0);
+
+            yield return null;
+        }
+        //yield return null;
     }
 
     public void ChangeHookConnectedState(bool toState)
