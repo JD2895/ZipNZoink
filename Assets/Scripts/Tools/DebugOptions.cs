@@ -15,5 +15,6 @@ public enum HookFireVariant
     TwoPress = 0,
     Hold = 1,
     OnePress = 2,
-    OneHook = 3
+    OneHook = 3,
+    None = 4
 }

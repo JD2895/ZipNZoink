@@ -117,7 +117,7 @@ public class VisualAimAssist : MonoBehaviour
                 rightLine.SetPosition(1, this.transform.position + ((Vector3)aimingDirection * fadeDistance));
             }
         }
-        else
+        else if (DebugOptions.hookFireVarient != HookFireVariant.None)
         {
             rightLine.enabled = true;
             rightLine.SetPosition(0, this.transform.position);
