@@ -324,4 +324,8 @@ public class TutorialController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter()
+    {
+
+    }
 }

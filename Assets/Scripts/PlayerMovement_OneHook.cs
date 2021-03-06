@@ -302,6 +302,10 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 hookSwingToApply = curHorInput * horHookMoveMult;
 
                 isWallSliding = false;
+                isAirJumping = false;
+                wallJumpBuffered = false;
+                isOnWall = false;
+                hasWallBehind = false;
             } 
             else
             {
@@ -572,17 +576,30 @@ public class PlayerMovement_OneHook : MonoBehaviour
             ApplyJump(0, jumpForce);
         }
         // Hook Jump
-        else if (jumpQueued && EvaluateHookState() == (int)HookedState.One && DebugOptions.hookJump)
+        else if (jumpQueued && EvaluateHookState() == (int)HookedState.One)
         {
-            //Debug.Log("Hook Jump!");
-            jumpQueued = false;
-            DetachHook.Invoke();
+            // Check if next to wall
+            float distance = 0.03f;
+            Vector3 castOrigin = bottomCollider.bounds.center;
+            Vector2 castSize = new Vector2(bottomCollider.radius * 2f, bottomCollider.radius * 0.6f);
+            RaycastHit2D raycastHit = Physics2D.BoxCast(castOrigin, castSize, 0f, new Vector2((int)directionFacing, 0f), distance, groundLayer);
 
-            isAirJumping = true;
-            directionWhenJumpStarted = directionFacing;
+            if (raycastHit.collider == null)
+            {
+                //Debug.Log("Hook Jump!");
+                jumpQueued = false;
+                DetachHook.Invoke();
 
-            rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
-            ApplyJump(0, hookJumpForceMult);
+                isAirJumping = true;
+                directionWhenJumpStarted = directionFacing;
+
+                rb.velocity = new Vector2(rb.velocity.x * hookJumpHorizMult, 0f);
+                ApplyJump(0, hookJumpForceMult);
+            }
+            else
+            {
+                wallJumpQueued = true;
+            }
         }
 
         // Wall Jump
