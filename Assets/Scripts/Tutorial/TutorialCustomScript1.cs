@@ -12,5 +12,14 @@ public class TutorialCustomScript1 : MonoBehaviour
         {
             DebugOptions.hookFireVarient = HookFireVariant.None;
         }
+        else
+        {
+            DebugOptions.hookFireVarient = HookFireVariant.OneHook;
+        }
+    }
+
+    public void SetNoneState (bool newState)
+    {
+        setToNone = newState;
     }
 }

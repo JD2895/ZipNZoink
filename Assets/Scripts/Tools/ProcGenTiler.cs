@@ -8,6 +8,7 @@ public class ProcGenTiler : MonoBehaviour
     public Tilemap plannerTMap = null;
     public TileBase plannerGroundTile = null;
     public TileBase plannerHazardTile = null;
+    public TileBase plannerGeneratedErrorTile = null;
 
     public Tilemap baseTMap = null;
     public Tilemap hazardTMap = null;
@@ -260,7 +261,11 @@ public class ProcGenTiler : MonoBehaviour
                 if (tileToSet != null)
                     baseTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), tileToSet);
                 else
-                    Debug.LogError("No Tile to set");
+                {
+                    Debug.LogWarning("No Tile to set: " + x + ", " + y);
+                    tileToSet = plannerGeneratedErrorTile;
+                    plannerTMap.SetTile(new Vector3Int(x + plannerTMap.origin.x, y + plannerTMap.origin.y, 0), tileToSet);
+                }
 
             }
         }

@@ -241,6 +241,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
     }
     #endregion
 
+    #region Buffers
     public IEnumerator JumpBufferTimer(float bufferTime)
     {
         jumpBuffered = true;
@@ -261,6 +262,7 @@ public class PlayerMovement_OneHook : MonoBehaviour
         yield return new WaitForSeconds(disableTime);
         allowAirMovement = true;
     }
+    #endregion
 
     private void Update()
     {

@@ -1,4 +1,4 @@
-// GENERATED AUTOMATICALLY FROM 'Assets/PlayerControls.inputactions'
+// GENERATED AUTOMATICALLY FROM 'Assets/Scripts/Player/PlayerControls.inputactions'
 
 using System;
 using System.Collections;
@@ -55,6 +55,14 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""type"": ""PassThrough"",
                     ""id"": ""9887a6db-9b69-4afa-ad1a-46af8655f986"",
                     ""expectedControlType"": ""Analog"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""e7099572-93bb-4bb9-b345-872d2fc1bedf"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
                 }
@@ -255,6 +263,28 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Reel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e42b9c83-88e2-4d3d-bee8-c4b7f6dd07c5"",
+                    ""path"": ""<Keyboard>/v"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d38ad6a5-e14a-4e92-83dd-c77d77e8988c"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -614,6 +644,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_OneHook_Jump = m_OneHook.FindAction("Jump", throwIfNotFound: true);
         m_OneHook_Fire = m_OneHook.FindAction("Fire", throwIfNotFound: true);
         m_OneHook_Reel = m_OneHook.FindAction("Reel", throwIfNotFound: true);
+        m_OneHook_Interact = m_OneHook.FindAction("Interact", throwIfNotFound: true);
         // TwoHook
         m_TwoHook = asset.FindActionMap("TwoHook", throwIfNotFound: true);
         m_TwoHook_HoriztonalAxis = m_TwoHook.FindAction("HoriztonalAxis", throwIfNotFound: true);
@@ -680,6 +711,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     private readonly InputAction m_OneHook_Jump;
     private readonly InputAction m_OneHook_Fire;
     private readonly InputAction m_OneHook_Reel;
+    private readonly InputAction m_OneHook_Interact;
     public struct OneHookActions
     {
         private @PlayerControls m_Wrapper;
@@ -689,6 +721,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         public InputAction @Jump => m_Wrapper.m_OneHook_Jump;
         public InputAction @Fire => m_Wrapper.m_OneHook_Fire;
         public InputAction @Reel => m_Wrapper.m_OneHook_Reel;
+        public InputAction @Interact => m_Wrapper.m_OneHook_Interact;
         public InputActionMap Get() { return m_Wrapper.m_OneHook; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -713,6 +746,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Reel.started -= m_Wrapper.m_OneHookActionsCallbackInterface.OnReel;
                 @Reel.performed -= m_Wrapper.m_OneHookActionsCallbackInterface.OnReel;
                 @Reel.canceled -= m_Wrapper.m_OneHookActionsCallbackInterface.OnReel;
+                @Interact.started -= m_Wrapper.m_OneHookActionsCallbackInterface.OnInteract;
+                @Interact.performed -= m_Wrapper.m_OneHookActionsCallbackInterface.OnInteract;
+                @Interact.canceled -= m_Wrapper.m_OneHookActionsCallbackInterface.OnInteract;
             }
             m_Wrapper.m_OneHookActionsCallbackInterface = instance;
             if (instance != null)
@@ -732,6 +768,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Reel.started += instance.OnReel;
                 @Reel.performed += instance.OnReel;
                 @Reel.canceled += instance.OnReel;
+                @Interact.started += instance.OnInteract;
+                @Interact.performed += instance.OnInteract;
+                @Interact.canceled += instance.OnInteract;
             }
         }
     }
@@ -857,6 +896,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         void OnJump(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnReel(InputAction.CallbackContext context);
+        void OnInteract(InputAction.CallbackContext context);
     }
     public interface ITwoHookActions
     {

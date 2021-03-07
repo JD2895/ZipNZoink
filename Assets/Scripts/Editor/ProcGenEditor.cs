@@ -21,7 +21,8 @@ public class ProcGenEditor : Editor
         procGenTiler.hazardTMap = (Tilemap)EditorGUILayout.ObjectField("Hazard Tilemap", procGenTiler.hazardTMap, typeof(Tilemap), true);
 
         procGenTiler.plannerGroundTile = (TileBase)EditorGUILayout.ObjectField("Planner Ground Tile", procGenTiler.plannerGroundTile, typeof(TileBase), true);
-        procGenTiler.plannerHazardTile = (TileBase)EditorGUILayout.ObjectField("Planner Ground Tile", procGenTiler.plannerHazardTile, typeof(TileBase), true);
+        procGenTiler.plannerHazardTile = (TileBase)EditorGUILayout.ObjectField("Planner Hazard Tile", procGenTiler.plannerHazardTile, typeof(TileBase), true);
+        procGenTiler.plannerGeneratedErrorTile = (TileBase)EditorGUILayout.ObjectField("Generator Error Tile", procGenTiler.plannerGeneratedErrorTile, typeof(TileBase), true);
 
         GUILayout.BeginHorizontal();
         if (GUILayout.Button("Generate Tiles"))
