@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class LevelChangeTrigger : MonoBehaviour
 {
     public string nextLevel;
-    public bool atDoor;
+    private bool atDoor;
     public GameObject interactPrompt;
 
     private PlayerControls controls;
@@ -21,6 +21,9 @@ public class LevelChangeTrigger : MonoBehaviour
     private void OnEnable()
     {
         controls.OneHook.Interact.performed += TryChangelevel;
+
+
+        controls.OneHook.Interact.Enable();
     }
 
     private void OnDisable()
@@ -54,8 +57,10 @@ public class LevelChangeTrigger : MonoBehaviour
 
     public void TryChangelevel(InputAction.CallbackContext obj)
     {
+        Debug.Log("here");
         if (atDoor)
         {
+            Debug.Log("here2");
             GameManager.instance.LoadLevel(nextLevel);
         }
     }
