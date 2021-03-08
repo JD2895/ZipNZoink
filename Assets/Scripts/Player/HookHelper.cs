@@ -145,4 +145,15 @@ public class HookHelper : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("CameraEdge") && firing)
+        {
+            hitGround = false;
+            firing = false;
+            hookAttached = false;
+            OnHookHitHazard?.Invoke(hookSide);
+        }
+    }
+
 }

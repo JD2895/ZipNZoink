@@ -8,6 +8,7 @@ TagManager:
   - Hook
   - DebugMenu
   - Coin
+  - CameraEdge
   layers:
   - Default
   - TransparentFX

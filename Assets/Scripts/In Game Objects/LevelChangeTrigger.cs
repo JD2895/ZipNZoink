@@ -9,6 +9,7 @@ public class LevelChangeTrigger : MonoBehaviour
     public string nextLevel;
     private bool atDoor;
     public GameObject interactPrompt;
+    public Animator doorAnimator;
 
     private PlayerControls controls;
 
@@ -20,7 +21,7 @@ public class LevelChangeTrigger : MonoBehaviour
 
     private void OnEnable()
     {
-        controls.OneHook.Interact.performed += TryChangelevel;
+        controls.OneHook.Interact.performed += HandleInteract;
 
 
         controls.OneHook.Interact.Enable();
@@ -28,7 +29,7 @@ public class LevelChangeTrigger : MonoBehaviour
 
     private void OnDisable()
     {
-        controls.OneHook.Interact.performed -= TryChangelevel;
+        controls.OneHook.Interact.performed -= HandleInteract;
     }
 
     void Start()
@@ -55,13 +56,17 @@ public class LevelChangeTrigger : MonoBehaviour
         }
     }
 
-    public void TryChangelevel(InputAction.CallbackContext obj)
+    public void HandleInteract(InputAction.CallbackContext obj)
     {
-        Debug.Log("here");
         if (atDoor)
         {
-            Debug.Log("here2");
-            GameManager.instance.LoadLevel(nextLevel);
+            doorAnimator.SetBool("DoorOpened", true);
+            //ChangeLevel();
         }
+    }
+
+    public void ChangeLevel()
+    {
+        GameManager.instance.LoadLevel(nextLevel);
     }
 }
