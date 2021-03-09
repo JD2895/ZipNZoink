@@ -413,6 +413,7 @@ MonoBehaviour:
   - {fileID: -7825059060802149688, guid: 188f3394c7da0fb44bed199b1baf25ab, type: 3}
   lineRenderContainerR: {fileID: 1759288043896278382}
   lineRenderContainerL: {fileID: 3501655602132890862}
+  charAnimator: {fileID: 1595976573933689816}
 --- !u!198 &8078100561838197724
 ParticleSystem:
   m_ObjectHideFlags: 0

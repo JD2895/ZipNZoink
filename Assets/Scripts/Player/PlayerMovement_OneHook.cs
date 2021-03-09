@@ -86,20 +86,16 @@ public class PlayerMovement_OneHook : MonoBehaviour
     [Header("Input Containers")]
     private float curHorInput = 0;
     private float curVerInput = 0;  // One Hook Variant
-    //private bool fireRightHook = false;
     private float reelRightHook = 0;
-    //private bool jumpInput = false;
-    //private bool dashDown = false;
 
     [Header("Visual Data")] // Most of this should eventually just be handles by an animator
-    public Sprite[] playerSprites;
     public GameObject lineRenderContainerR;
     public GameObject lineRenderContainerL;
     private SpriteRenderer playerSprite;
+    public Animator charAnimator;
 
     // NEW INPUT SYSTEM
     PlayerControls controls;
-
     #endregion
 
     #region Initialization Methods
@@ -269,12 +265,14 @@ public class PlayerMovement_OneHook : MonoBehaviour
         if (curHorInput > 0)
         {
             directionFacing = HoriDirection.Right;
-            playerSprite.sprite = playerSprites[0];
+            float localeScaleX = allowAirMovement ? 1f : -1f;
+            playerSprite.transform.localScale = new Vector3(localeScaleX, 1, 1);
         }
         else if (curHorInput < 0)
         {
             directionFacing = HoriDirection.Left;
-            playerSprite.sprite = playerSprites[1];
+            float localeScaleX = allowAirMovement ? -1f : 1f;
+            playerSprite.transform.localScale = new Vector3(localeScaleX, 1, 1);
         }
 
         hookSwingToApply = 0;
@@ -288,12 +286,17 @@ public class PlayerMovement_OneHook : MonoBehaviour
             wallJumpBuffered = false;
             isOnWall = false;
             hasWallBehind = false;
-
             hangTimer = hangTime;
+
+            // Animation
+            charAnimator.SetBool("IsGrounded", true);
         }
         else
         {
             hangTimer -= Time.deltaTime;
+
+            // Animation
+            charAnimator.SetBool("IsGrounded", false);
 
             if (IsHooked())
             {
@@ -308,9 +311,15 @@ public class PlayerMovement_OneHook : MonoBehaviour
                 wallJumpBuffered = false;
                 isOnWall = false;
                 hasWallBehind = false;
+
+                // Animation
+                charAnimator.SetBool("IsHooked", true);
             } 
             else
             {
+                // Animation
+                charAnimator.SetBool("IsHooked", false);
+
                 // Check for pressing against wall or if still on wall
                 if (curHorInput != 0 || isOnWall)
                 {
@@ -358,6 +367,15 @@ public class PlayerMovement_OneHook : MonoBehaviour
 
         ControlHooks();
         watchthis = rb.velocity;
+    }
+
+    private void LateUpdate()
+    {
+        //Animation
+        charAnimator.SetFloat("AbsXVelocity", Mathf.Abs(rb.velocity.x));
+        charAnimator.SetFloat("RelHorizontalInput", Mathf.Sign(rb.velocity.x) * curHorInput);
+        charAnimator.SetFloat("RelYVelocity", rb.velocity.y);
+        charAnimator.SetBool("IsOnWall", isOnWall);
     }
 
     private bool IsGrounded()
