@@ -38450,6 +38450,56 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSizes.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: castingLayers.m_Bits
+      value: 3328
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: castDistance
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSize1
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSize2
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSize3
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSizes.Array.data[0]
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSizes.Array.data[1]
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSizes.Array.data[2]
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418828581335778339, guid: fd785d73575cb814e8576312439ac933,
+        type: 3}
+      propertyPath: circleSizes.Array.data[3]
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 7092135217531955643, guid: fd785d73575cb814e8576312439ac933,
         type: 3}
       propertyPath: m_LocalPosition.y
@@ -38458,7 +38508,7 @@ PrefabInstance:
     - target: {fileID: 7092135217531955643, guid: fd785d73575cb814e8576312439ac933,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.5
+      value: -9
       objectReference: {fileID: 0}
     - target: {fileID: 7092135218172538194, guid: fd785d73575cb814e8576312439ac933,
         type: 3}
